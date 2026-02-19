@@ -130,6 +130,50 @@
 }
 
 
+/* Modal escondido */
+.mobile-modal {
+  display: none;
+}
+
+/* Só ativa no mobile */
+@media (max-width: 768px) {
+
+  .mobile-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  }
+
+  .mobile-card {
+    width: 95%;
+    height: 90vh;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .mobile-card iframe {
+    flex: 1;
+    border: none;
+  }
+
+  .close-modal {
+    background: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 10px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+}
 
 </style>
 </head>
@@ -150,7 +194,7 @@
         <!-- Produtos -->
         <button class="menu-btn" id="btn-produtos">📦 Produtos</button>
         <div class="submenu" id="submenu-produtos">
-          <button class="menu-btn" onclick="loadPage('cadastro.html')">Lista de Produtos</button>
+          <button class="menu-btn" onclick="openProdutos()">  Lista de Produtos</button>
           <button class="menu-btn" onclick="loadPage('inventario.html')">Inventário</button>
           <button class="menu-btn" onclick="loadPage('categorias.html')">Categorias</button>
         </div>
@@ -204,6 +248,14 @@
     <iframe id="iframe-content" src="inicio.html"></iframe>
   </div>
 
+  <div id="mobile-modal" class="mobile-modal">
+  <div class="mobile-card">
+    <button class="close-modal" onclick="closeMobileModal()">✖</button>
+    <iframe id="mobile-iframe" src=""></iframe>
+  </div>
+</div>
+
+
   <script>
     // Alternar submenus
     document.getElementById("btn-loja-online").addEventListener("click", function() {
@@ -231,7 +283,20 @@
       document.getElementById("iframe-content").src = page;
     }
 
-    
+    function openProdutos() {
+  if (window.innerWidth <= 768) {
+    document.getElementById("mobile-modal").style.display = "flex";
+    document.getElementById("mobile-iframe").src = "cadastro.html";
+  } else {
+    loadPage("cadastro.html");
+  }
+}
+
+function closeMobileModal() {
+  document.getElementById("mobile-modal").style.display = "none";
+  document.getElementById("mobile-iframe").src = "";
+}
+
 
   </script>
 
