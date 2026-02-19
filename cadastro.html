@@ -193,11 +193,23 @@
   </div>
   <div style="grid-column: span 2;">
     <label>Imagens do Produto:</label>
-    <input 
-  type="file" 
-  id="imagens" 
-  multiple 
-  accept="image/*" 
+    <!-- Inputs escondidos -->
+  <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;">
+  <input type="file" id="galleryInput" accept="image/*" multiple style="display:none;">
+
+  <!-- Botões -->
+  <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+    <button type="button" onclick="document.getElementById('cameraInput').click()">
+      📷 Tirar Foto
+    </button>
+
+    <button type="button" onclick="document.getElementById('galleryInput').click()">
+      🖼️ Escolher da Galeria
+    </button>
+  </div>
+
+  <div class="preview" id="preview"></div>
+</div>
   
 
 
@@ -234,7 +246,6 @@
 const form = document.getElementById('productForm');
 const tableBody = document.querySelector('#productTable tbody');
 const preview = document.getElementById('preview');
-const inputImagens = document.getElementById('imagens');
 const filtroInput = document.getElementById('filtroInput');
 
 let imagensSelecionadas = [];
@@ -242,10 +253,11 @@ let produtos = [];
 let produtoEditando = null;
 
 // Pré-visualização das imagens
-inputImagens.addEventListener('change', () => {
-  preview.innerHTML = "";
-  imagensSelecionadas = [];
-  Array.from(inputImagens.files).forEach(file => {
+const cameraInput = document.getElementById('cameraInput');
+const galleryInput = document.getElementById('galleryInput');
+
+function processarImagens(files) {
+  Array.from(files).forEach(file => {
     const reader = new FileReader();
     reader.onload = (e) => {
       const img = document.createElement('img');
@@ -255,7 +267,16 @@ inputImagens.addEventListener('change', () => {
     };
     reader.readAsDataURL(file);
   });
+}
+
+cameraInput.addEventListener('change', (e) => {
+  processarImagens(e.target.files);
 });
+
+galleryInput.addEventListener('change', (e) => {
+  processarImagens(e.target.files);
+});
+
 
 // Carregar produtos
 async function carregarProdutos() {
