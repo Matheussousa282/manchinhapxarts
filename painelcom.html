@@ -107,6 +107,34 @@
     height: 100%;
     border: none;
   }
+
+  /* PADRÃO DESKTOP */
+#iframe-content {
+  width: 100%;
+  height: 100vh;
+  border: none;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+  #iframe-content {
+    width: 95%;
+    height: auto;
+    min-height: 90vh;
+    margin: 20px auto;
+    display: block;
+    border-radius: 18px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    background: #fff;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -148,7 +176,7 @@
         <div class="submenu" id="submenu-marketing">
           <button class="menu-btn" onclick="loadPage('banner1.html')">Banner 1</button>
           <button class="menu-btn" onclick="loadPage('banner2.html')">Banner 2</button>
-          s<button class="menu-btn" onclick="loadPage('banner3.html')">Banner 3</button>
+          <button class="menu-btn" onclick="loadPage('banner3.html')">Banner 3</button>
       </div>
       </div>
 
