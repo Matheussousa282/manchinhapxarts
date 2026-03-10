@@ -19,7 +19,13 @@
   input, select, textarea { width:100%; padding:10px; border:1px solid #efefe9; border-radius:8px; font-size:1em; margin-top:5px; background:#eeeeeb; transition:0.3s; }
   input:focus, select:focus, textarea:focus { outline:none; border-color:#f0f0ed; box-shadow:0 0 5px rgba(55, 55, 55, 0.3); }
   textarea { grid-column: span 2; resize:none; }
-  .preview { grid-column: span 2; display:flex; flex-wrap:wrap; gap:10px; }
+  .preview{
+  grid-column: span 2;
+  display:grid;
+  grid-template-columns: repeat(auto-fill, 90px);
+  gap:10px;
+  margin-top:10px;
+}
   .preview img { width:90px; height:90px; object-fit:cover; border-radius:8px; border:1px solid #b2b2ac; transition: transform 0.3s ease; }
   .preview img:hover { transform:scale(1.05); }
   .btn { grid-column: span 2; text-align:right; }
@@ -148,6 +154,11 @@
     font-size: 11px;
     padding: 6px;
   }
+
+  .preview{
+  grid-template-columns: repeat(3, 1fr);
+  justify-items:center;
+}
 }
 
 .preview-item{
