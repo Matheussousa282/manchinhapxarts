@@ -150,6 +150,37 @@
   }
 }
 
+.preview-item{
+  position:relative;
+}
+
+.preview-item img{
+  width:90px;
+  height:90px;
+  object-fit:cover;
+  border-radius:8px;
+}
+
+.remover-img{
+  position:absolute;
+  top:-6px;
+  right:-6px;
+  background:#dc2626;
+  color:white;
+  border:none;
+  border-radius:50%;
+  width:22px;
+  height:22px;
+  font-size:12px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.remover-img:hover{
+  background:#b91c1c;
+}
 </style>
 </head>
 <body>
@@ -254,6 +285,7 @@ const cameraInput = document.getElementById('cameraInput');
 const galleryInput = document.getElementById('galleryInput');
 
 function processarImagens(files) {
+
   Array.from(files).forEach(file => {
 
     const img = new Image();
@@ -285,15 +317,36 @@ function processarImagens(files) {
 
       const compressed = canvas.toDataURL("image/jpeg", 0.7);
 
+      const wrapper = document.createElement("div");
+      wrapper.className = "preview-item";
+
       const previewImg = document.createElement("img");
       previewImg.src = compressed;
 
-      preview.appendChild(previewImg);
+      const btnRemover = document.createElement("button");
+      btnRemover.className = "remover-img";
+      btnRemover.innerHTML = "🗑️";
+
+      btnRemover.onclick = () => {
+        const index = imagensSelecionadas.indexOf(compressed);
+        if(index > -1){
+          imagensSelecionadas.splice(index,1);
+        }
+        wrapper.remove();
+      };
+
+      wrapper.appendChild(previewImg);
+      wrapper.appendChild(btnRemover);
+
+      preview.appendChild(wrapper);
+
       imagensSelecionadas.push(compressed);
     };
 
     reader.readAsDataURL(file);
+
   });
+
 }
 cameraInput.addEventListener('change', (e) => {
   processarImagens(e.target.files);
@@ -443,9 +496,28 @@ window.editarProduto = function(index){
 
   if (imagensSelecionadas.length > 0) {
     imagensSelecionadas.forEach(src => {
-      const img = document.createElement('img');
-      img.src = src;
-      preview.appendChild(img);
+      const wrapper = document.createElement("div");
+wrapper.className = "preview-item";
+
+const img = document.createElement("img");
+img.src = src;
+
+const btnRemover = document.createElement("button");
+btnRemover.className = "remover-img";
+btnRemover.innerHTML = "🗑️";
+
+btnRemover.onclick = () => {
+  const index = imagensSelecionadas.indexOf(src);
+  if(index > -1){
+    imagensSelecionadas.splice(index,1);
+  }
+  wrapper.remove();
+};
+
+wrapper.appendChild(img);
+wrapper.appendChild(btnRemover);
+
+preview.appendChild(wrapper);
     });
   }
 };
