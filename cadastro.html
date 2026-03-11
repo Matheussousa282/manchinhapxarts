@@ -461,8 +461,8 @@ form.addEventListener('submit', async (e) => {
         headers: {'Content-Type':'application/json'},
         body: JSON.stringify({nome, categoria, venda, estoque, codigo, descricao, imagens: imagensSelecionadas})
       });
-      produtoSalvo = await res.json();
-      produtos.unshift(produtoSalvo);
+      await res.json();
+      await carregarProdutos();
     }
     atualizarTabela();
     form.reset();
