@@ -13,12 +13,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://manchinhapxarts.vercel.app.app/public/mpxartss.jpeg">
 <title>Loja — ManchinhaPx Arts</title>
-<link rel="preconnect" href="https://manchinhapxarts.vercel.app">
-<link rel="dns-prefetch" href="https://manchinhapxarts.vercel.app">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-<noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet"></noscript>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#8a8ac2; --card:#565555; --accent:#ffcc00; --muted:#bfbfbf; --white:#8e7a0b;
@@ -896,22 +891,6 @@ footer {
   animation: pulseSkeleton 1.4s infinite ease-in-out;
 }
 
-/* Shimmer animado enquanto imagem carrega */
-.img-shimmer {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.2s infinite;
-  border-radius: 6px;
-}
-@keyframes shimmer {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-.thumb img.loaded { animation: fadeIn 0.35s ease; }
-@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
-
 .skeleton-thumb {
   width: 100%;
   height: 160px;
@@ -1729,10 +1708,23 @@ document.getElementById("btnEnviarEntrega").onclick = () => {
 
 function mostrarSkeletons() {
   const grid = document.getElementById("productsGrid");
-  const items = Array.from({length: 8}, () =>
-    `<div class="skeleton-card"><div class="skeleton-thumb"></div><div class="skeleton-line" style="width:80%"></div><div class="skeleton-line" style="width:60%"></div><div class="skeleton-line" style="width:40%"></div></div>`
-  );
-  grid.innerHTML = `<div style="width:100%;text-align:center;font-size:18px;margin-bottom:12px;color:#555;">🔄 Carregando produtos…</div>` + items.join("");
+
+  grid.innerHTML = `
+    <div style="width:100%;text-align:center;font-size:18px;margin-bottom:12px;color:#555;">
+      🔄 Organizando os Produtos na Vitrine…
+    </div>
+  `;
+
+  for (let i = 0; i < 8; i++) {
+    grid.innerHTML += `
+      <div class="skeleton-card">
+        <div class="skeleton-thumb"></div>
+        <div class="skeleton-line" style="width: 80%"></div>
+        <div class="skeleton-line" style="width: 60%"></div>
+        <div class="skeleton-line" style="width: 40%"></div>
+      </div>
+    `;
+  }
 }
 
 
@@ -1789,23 +1781,31 @@ function mostrarSkeletons() {
 
   async function fetchProdutos(){
   try {
-    // Busca produtos e promoções ao MESMO TEMPO
-    const [rProd, rPromo] = await Promise.all([
-      fetch(API_BASE + '/produtos'),
-      fetch(API_BASE + '/promocoes').catch(() => null)
-    ]);
+    const r = await fetch(API_BASE + '/produtos');
+    produtos = await r.json();
 
-    produtos = await rProd.json();
-    if (rPromo) try { promocoes = await rPromo.json(); } catch(e) { promocoes = []; }
+/* 🚀 1️⃣ MOSTRA PRODUTOS IMEDIATAMENTE */
+renderProdutosSimples(produtos);
 
-    // 1️⃣ Mostra produtos SEM imagem imediatamente (shimmer no lugar)
-    loadingOverlay.style.display = "none";
-    renderMenuCategorias();
-    preencherFiltroCategorias();
+/* 🚀 2️⃣ ESCONDE LOADING AGORA */
+loadingOverlay.style.display = "none";
+
+/* ⚙️ 3️⃣ ORGANIZA TUDO DEPOIS (SEM TRAVAR) */
+setTimeout(() => {
+  renderMenuCategorias();
+  preencherFiltroCategorias();
+
+  // só renderiza carrossel se NÃO estiver pesquisando
+  if (!q.value.trim()) {
     renderProdutos();
+  }
+}, 50);
 
-    // 2️⃣ Carrega imagens em fila — sem travar o browser
-    processarFilaImagens();
+
+    // 3️⃣ PROMOÇÕES EM SEGUNDO PLANO (SEM BLOQUEAR)
+    fetchPromocoes().then(() => {
+      renderProdutos(); // atualiza preços se tiver promoção
+    });
 
   } catch (e) {
     console.error('Erro produtos', e);
@@ -1813,40 +1813,6 @@ function mostrarSkeletons() {
     loadingOverlay.style.display = "none";
   }
 }
-
-  // Fila de imagens: carrega LOTE_SIZE por vez, deixa o browser respirar entre cada lote
-  function processarFilaImagens() {
-    const LOTE = 4; // quantas imagens decodifica por vez
-    const thumbs = Array.from(document.querySelectorAll('.thumb[data-b64]'));
-    let i = 0;
-
-    function proximoLote() {
-      if (i >= thumbs.length) return;
-      const lote = thumbs.slice(i, i + LOTE);
-      i += LOTE;
-
-      lote.forEach(thumb => {
-        const b64 = thumb.dataset.b64;
-        if (!b64) return;
-        delete thumb.dataset.b64; // evita reprocessar
-
-        const img = new Image();
-        img.decoding = 'async';
-        img.onload  = () => { img.classList.add('loaded'); thumb.innerHTML = ''; thumb.appendChild(img); };
-        img.onerror = () => { thumb.innerHTML = ''; }; // sem imagem, só limpa o shimmer
-        img.src = b64.startsWith('data:image') ? b64 : `data:image/jpeg;base64,${b64}`;
-      });
-
-      // usa requestIdleCallback se disponível, senão setTimeout — deixa browser livre
-      if (window.requestIdleCallback) {
-        requestIdleCallback(proximoLote, { timeout: 300 });
-      } else {
-        setTimeout(proximoLote, 30);
-      }
-    }
-
-    proximoLote();
-  }
 
   async function fetchPromocoes(){
   try {
@@ -1915,28 +1881,28 @@ function renderCategoriasComCarrossel(lista) {
       track.scrollBy({ left: 300, behavior: "smooth" });
     };
 
-    const frag = document.createDocumentFragment();
     produtosCat.forEach(p => {
-      const article = document.createElement('article');
-      article.className = 'product-card';
+      let img = "/placeholder.png";
+      if (p.imagem_base64) {
+        img = p.imagem_base64.startsWith("data:image")
+          ? p.imagem_base64
+          : `data:image/jpeg;base64,${p.imagem_base64}`;
+      }
 
-      const thumbDiv = document.createElement('div');
-      thumbDiv.className = 'thumb';
-      if (p.imagem_base64) thumbDiv.dataset.b64 = p.imagem_base64; // fila vai pegar depois
-      thumbDiv.innerHTML = '<div class="img-shimmer"></div>'; // shimmer enquanto espera
-
-      article.appendChild(thumbDiv);
-      article.insertAdjacentHTML('beforeend',
-        `<div class="title">${p.nome}</div>
-         <div class="price">${money(p.preco)}</div>
-         <div class="actions">
-           <button class="btn info" onclick="openProduct(${p.id})">Ver</button>
-           <button class="btn buy"  onclick="addToCart(${p.id},1)">Comprar</button>
-         </div>`
-      );
-      frag.appendChild(article);
+      track.innerHTML += `
+        <article class="product-card">
+          <div class="thumb">
+            <img loading="lazy" decoding="async" src="${img}">
+          </div>
+          <div class="title">${p.nome}</div>
+          <div class="price">${money(p.preco)}</div>
+          <div class="actions">
+            <button class="btn info" onclick="openProduct(${p.id})">Ver</button>
+            <button class="btn buy" onclick="addToCart(${p.id},1)">Comprar</button>
+          </div>
+        </article>
+      `;
     });
-    track.appendChild(frag);
 
     container.appendChild(bloco);
 
@@ -2002,6 +1968,7 @@ function ativarTravamentoDeScroll(track) {
     
 
     renderCategoriasComCarrossel(list);
+    updateCartUI();
   }
   
 
@@ -2939,15 +2906,22 @@ window.selecionarCategoriaMenu = (cat) => {
 };
 
 
-  // carregamento inicial
-  updateCartUI();
+  // initial load
   mostrarSkeletons();
-  setTimeout(() => {
+
+setTimeout(() => {
     fetchProdutos();
-    carregarBanners();
-  }, 3);
+}, 3); // tempo IDEAL para o skeleton aparecer
+
+  setTimeout(() => {
+  carregarBanners();
+}, 800);
+  updateCartUI();
 });
 </script>
 </body>
 
 </html>
+
+
+
