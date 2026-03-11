@@ -60,26 +60,90 @@ header{
 
 
 
+/* ===== CARROSSEL DO MODAL — wrapper externo p/ setas, inner p/ clip ===== */
+.carousel-wrapper {
+  position: relative;
+  width: 100%;
+}
+
 .carousel {
   position: relative;
   width: 100%;
-  height: 320px;
-  overflow: hidden;
-  border-radius: 8px;
+  height: 280px;
+  overflow: hidden;          /* clip dos slides — NÃO pode ser visible */
+  border-radius: 10px;
   background: #0a0a0a;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .carousel-track {
   display: flex;
-  transition: transform 0.4s ease-in-out;
   width: 100%;
   height: 100%;
+  transition: transform 0.42s cubic-bezier(0.25,0.46,0.45,0.94);
 }
 
+.carousel-track img {
+  min-width: 100%;
+  height: 100%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border-radius: 10px;
+  user-select: none;
+  -webkit-user-drag: none;
+}
 
+/* Setas ficam no .carousel-wrapper (fora do overflow:hidden) */
+.carousel-wrapper .arrow-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.55);
+  color: #fff;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 10;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, transform 0.15s;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+}
+.carousel-wrapper .arrow-btn:hover {
+  background: rgba(255,255,255,0.2);
+  transform: translateY(-50%) scale(1.08);
+}
+.carousel-wrapper .arrow-left { left: 10px; }
+.carousel-wrapper .arrow-right { right: 10px; }
+
+/* Dots de navegação */
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+.carousel-dots span {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #bbb;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+  display: inline-block;
+}
+.carousel-dots span.active {
+  background: #111;
+  transform: scale(1.35);
+}
+
+/* Badges de promoção nos cards */
+.product-card .price-promo { display:flex; flex-direction:column; gap:2px; }
+.product-card .price-original { text-decoration:line-through; color:#999 !important; font-size:12px; font-weight:400; }
+.product-card .price-final { color:#d32f2f !important; font-weight:700; font-size:15px; }
+.product-card .price-badge { display:inline-block; background:#d32f2f; color:#fff; font-size:10px; font-weight:700; padding:2px 6px; border-radius:4px; margin-top:2px; }
 
 /* arrow shared style (round, like banner) */
 .arrow-btn {
@@ -321,22 +385,9 @@ footer{padding:28px 18px;color:var(--muted);text-align:center}
   overflow: visible !important;       /* evita esticar */
 }
 
-/* Forçar o carrossel a ter o MESMO TAMANHO SEMPRE */
-.modal .carousel {
-  width: 100%;
-  height: 35vh; /* ocupa 35% da tela */
-  max-height: 260px; /* mas não passa do tamanho original */
-  overflow: hidden;
-  background: #000;
-  position: relative;
-}
+/* Regra removida — .carousel já tem height/overflow corretos globalmente */
 
-.carousel-track {
-  display: flex;
-  width: 100%;
-  height: 100%;
-  transition: transform .3s ease;
-}
+/* (carousel-track definido acima no bloco do wrapper) */
 
 
 
@@ -1012,7 +1063,7 @@ footer {
 }
 
 /* ===== CORREÇÃO DAS SETINHAS ===== */
-.carousel,
+/* .carousel NÃO entra aqui — ele precisa de overflow:hidden para clipar os slides */
 .banner-carousel,
 .categoria-wrap {
   overflow: visible !important;
@@ -1092,10 +1143,14 @@ footer {
   <div class="dialog" role="dialog" aria-modal="true" >
 
     <button class="close" id="closeModal" style="position:absolute;top:14px;right:14px">✕</button>
-    <div class="carousel" style="width:100%">
+    <!-- carrossel do modal: wrapper externo p/ setas, .carousel com overflow:hidden p/ clip -->
+    <div class="carousel-wrapper">
       <button class="arrow-btn arrow-left" id="prevImg">❮</button>
-      <div class="carousel-track" id="carouselTrack"></div>
+      <div class="carousel">
+        <div class="carousel-track" id="carouselTrack"></div>
+      </div>
       <button class="arrow-btn arrow-right" id="nextImg">❯</button>
+      <div class="carousel-dots" id="carouselDots"></div>
     </div>
     <div class="conteudo-modal" style="display:flex;flex-direction:column;gap:12px;padding:6px">
 
@@ -1889,19 +1944,31 @@ function renderCategoriasComCarrossel(lista) {
           : `data:image/jpeg;base64,${p.imagem_base64}`;
       }
 
-      track.innerHTML += `
-        <article class="product-card">
-          <div class="thumb">
-            <img loading="lazy" decoding="async" src="${img}">
-          </div>
-          <div class="title">${p.nome}</div>
-          <div class="price">${money(p.preco)}</div>
-          <div class="actions">
-            <button class="btn info" onclick="openProduct(${p.id})">Ver</button>
-            <button class="btn buy" onclick="addToCart(${p.id},1)">Comprar</button>
-          </div>
-        </article>
+      // ===== PREÇO COM PROMOÇÃO =====
+      const promo = aplicarPromocao(p);
+      const precoOrig = Number(p.preco || 0);
+      const priceHtml = (promo.label && promo.preco < precoOrig)
+        ? `<div class="price price-promo">
+             <span class="price-original">${money(precoOrig)}</span>
+             <span class="price-final">${money(promo.preco)}</span>
+             <span class="price-badge">${promo.label}</span>
+           </div>`
+        : `<div class="price">${money(precoOrig)}</div>`;
+
+      const card = document.createElement('article');
+      card.className = 'product-card';
+      card.innerHTML = `
+        <div class="thumb">
+          <img loading="lazy" decoding="async" src="${img}">
+        </div>
+        <div class="title">${p.nome}</div>
+        ${priceHtml}
+        <div class="actions">
+          <button class="btn info" onclick="openProduct(${p.id})">Ver</button>
+          <button class="btn buy" onclick="addToCart(${p.id},1)">Comprar</button>
+        </div>
       `;
+      track.appendChild(card);
     });
 
     container.appendChild(bloco);
@@ -2040,36 +2107,67 @@ if (it.id === 999999) {
 
   /* product modal */
   let currentIndex = 0;
+  let currentImagens = [];
+
+  function goToSlide(n) {
+    const track = document.getElementById('carouselTrack');
+    currentIndex = n;
+    track.style.transform = `translateX(-${currentIndex * 100}%)`;
+    const dots = document.getElementById('carouselDots');
+    if (dots) [...dots.children].forEach((d, i) => d.classList.toggle('active', i === n));
+  }
+
   function openProduct(id){
     const p = produtos.find(x => x.id == id); if(!p) return;
-    const imagens = Array.isArray(p.imagens) && p.imagens.length > 0 ? p.imagens : (p.imagem_base64 ? [p.imagem_base64] : []);
+    currentImagens = Array.isArray(p.imagens) && p.imagens.length > 0 ? p.imagens : (p.imagem_base64 ? [p.imagem_base64] : []);
     const track = document.getElementById('carouselTrack');
-    if(!imagens.length) track.innerHTML = '<div style="color:#aaa">Sem imagem</div>';
-    else track.innerHTML = imagens.map(img => {
-      const src = img.startsWith('data:image') ? img : `data:image/jpeg;base64,${img}`;
-      return `<img loading="lazy" decoding="async" src="${src}" alt="">`;
+    const dotsEl = document.getElementById('carouselDots');
 
-    }).join('');
+    if(!currentImagens.length) {
+      track.innerHTML = '<div style="color:#aaa;display:flex;align-items:center;justify-content:center;height:100%">Sem imagem</div>';
+      dotsEl.innerHTML = '';
+    } else {
+      track.innerHTML = currentImagens.map(img => {
+        const src = img.startsWith('data:image') ? img : `data:image/jpeg;base64,${img}`;
+        return `<img loading="lazy" decoding="async" src="${src}" alt="" style="cursor:zoom-in">`;
+      }).join('');
 
-    // ➜ Ativar clique para fullscreen
-    
+      // dots
+      dotsEl.innerHTML = currentImagens.length > 1
+        ? currentImagens.map((_, i) => `<span class="${i===0?'active':''}"></span>`).join('')
+        : '';
+      [...dotsEl.children].forEach((d, i) => d.onclick = () => goToSlide(i));
 
-document.querySelectorAll("#carouselTrack img").forEach((img, index) => {
-  img.style.cursor = "zoom-in";
-  img.onclick = () => openFullScreen(imagens, index);
-});
+      // fullscreen ao clicar
+      track.querySelectorAll('img').forEach((img, i) => {
+        img.onclick = () => openFullScreen(currentImagens, i);
+      });
+    }
 
     currentIndex = 0;
-    track.style.transform = `translateX(0%)`;
-    const prevImg = document.getElementById('prevImg');
-    const nextImg = document.getElementById('nextImg');
-    prevImg.onclick = ()=>{ if(imagens.length){ currentIndex = (currentIndex - 1 + imagens.length) % imagens.length; track.style.transform = `translateX(-${currentIndex * 100}%)`; } };
-    nextImg.onclick = ()=>{ if(imagens.length){ currentIndex = (currentIndex + 1) % imagens.length; track.style.transform = `translateX(-${currentIndex * 100}%)`; } };
+    track.style.transform = 'translateX(0%)';
+
+    // setas
+    document.getElementById('prevImg').onclick = () => {
+      if(currentImagens.length) goToSlide((currentIndex - 1 + currentImagens.length) % currentImagens.length);
+    };
+    document.getElementById('nextImg').onclick = () => {
+      if(currentImagens.length) goToSlide((currentIndex + 1) % currentImagens.length);
+    };
+
+    // swipe touch no carrossel do modal
+    let _swipeX = 0;
+    track.ontouchstart = e => { _swipeX = e.touches[0].clientX; };
+    track.ontouchend = e => {
+      const dx = e.changedTouches[0].clientX - _swipeX;
+      if (Math.abs(dx) > 40 && currentImagens.length > 1) {
+        if (dx < 0) goToSlide((currentIndex + 1) % currentImagens.length);
+        else goToSlide((currentIndex - 1 + currentImagens.length) % currentImagens.length);
+      }
+    };
 
     modalTitle.textContent = p.nome;
     modalDesc.innerHTML = (p.descricao || '').replace(/\n/g, "<br>");
-
-    
 
  const categoriaProd = (p.categoria_nome || p.categoria || "").toLowerCase().trim();
 const nomeProd = (p.nome || "").toLowerCase().trim();
