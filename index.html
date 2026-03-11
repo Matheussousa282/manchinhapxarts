@@ -1881,12 +1881,22 @@ setTimeout(() => {
 
   function aplicarPromocao(prod){
     const precoOriginal = Number(prod.preco || 0);
-    const promo = promocoes.find(p => p.nome_produto === prod.nome && p.ativo !== false);
+    // comparação robusta: ignora maiúsculas/minúsculas e espaços extras
+    const nomeProdNorm = (prod.nome || '').trim().toLowerCase();
+    const promo = promocoes.find(p => {
+      const nomePromoNorm = (p.nome_produto || '').trim().toLowerCase();
+      return nomePromoNorm === nomeProdNorm && p.ativo !== false;
+    });
     if(!promo) return { preco: precoOriginal, label: null };
     if(promo.data_fim && new Date(promo.data_fim) < new Date()) return { preco: precoOriginal, label: null };
-    if(promo.tipo === 'percentual'){ const preco = precoOriginal * (1 - Number(promo.valor)/100); return { preco, label: `${promo.valor}% OFF` }; }
-    const preco = precoOriginal - Number(promo.valor);
-    return { preco: Math.max(0, preco), label: `R$ ${Number(promo.valor).toFixed(2)} OFF` };
+    const valor = Number(promo.valor);
+    if(isNaN(valor) || valor <= 0) return { preco: precoOriginal, label: null };
+    if(promo.tipo === 'percentual'){
+      const preco = precoOriginal * (1 - valor / 100);
+      return { preco, label: `${valor}% OFF` };
+    }
+    const preco = precoOriginal - valor;
+    return { preco: Math.max(0, preco), label: `- R$ ${valor.toFixed(2)}` };
   }
 
  /* ===============================
@@ -2362,16 +2372,28 @@ if (nomeProd.includes("brasão") || nomeProd.includes("brasa") || nomeProd.inclu
 
 
     const promo = aplicarPromocao(p);
-    if(promo.preco < Number(p.preco || 0)){
-      modalPrice.innerHTML = `<small style="text-decoration:line-through;color:var(--muted)">${money(p.preco)}</small>
-      <div style="color:#0f0;font-weight:700">${money(promo.preco)} <span style="font-size:12px;color:#0f0">${promo.label}</span></div>`;
-    } else modalPrice.textContent = money(p.preco);
+    const precoOrigModal = Number(p.preco || 0);
+    // só aplica preço se NÃO for produto com seletor próprio (boné, bandeira, brasão, luminoso, camisa)
+    const temSeletorProprio = isLuminosoAcrilico
+      || nomeProd === "boné personalizados" || nomeProd === "boné personalizado"
+      || isBandeiraCategoria || isPersonalize
+      || nomeProd.includes("brasão") || nomeProd.includes("brasa") || nomeProd.includes("grade do capo")
+      || nomeProd === "personalize sua camisa" || categoriaProd.includes("camisas");
+
+    if (!temSeletorProprio) {
+      if (promo.label && promo.preco < precoOrigModal) {
+        modalPrice.innerHTML = `
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <span style="text-decoration:line-through;color:#999;font-size:13px;font-weight:400">${money(precoOrigModal)}</span>
+            <span style="color:#d32f2f;font-weight:700;font-size:18px">${money(promo.preco)}</span>
+            <span style="display:inline-block;background:#d32f2f;color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:5px;width:fit-content">${promo.label}</span>
+          </div>`;
+      } else {
+        modalPrice.textContent = money(precoOrigModal);
+      }
+    }
+
     qtyInput.value = 1;
-    // Remover eventual taxa antiga antes de adicionar novamente
-function removeTaxaArte() {
-    cart = cart.filter(item => item.id !== 999999); // id reservado para a taxa
-    saveCart();
-}
 
     addToCartModal.onclick = () => {
     const quantidade = Number(qtyInput.value || 1);
