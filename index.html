@@ -1069,13 +1069,22 @@ footer {
   overflow: visible !important;
 }
 
-.arrow-btn,
-.cat-arrow,
-#prevImg,
-#nextImg,
+/* Setas do BANNER e do MODAL do produto — precisam ficar visíveis */
 #prevBanner,
 #nextBanner {
   z-index: 9999 !important;
+  pointer-events: auto !important;
+}
+
+/* Setas do carrossel do modal — ficam dentro do modal (z-index 10000) */
+#prevImg,
+#nextImg {
+  pointer-events: auto !important;
+}
+
+/* Setas das categorias — z-index baixo para NÃO aparecer sobre o modal */
+.cat-arrow {
+  z-index: 10 !important;
   pointer-events: auto !important;
 }
 
@@ -1850,17 +1859,11 @@ setTimeout(() => {
   renderMenuCategorias();
   preencherFiltroCategorias();
 
-  // só renderiza carrossel se NÃO estiver pesquisando
-  if (!q.value.trim()) {
-    renderProdutos();
-  }
+  // Busca promoções e só então renderiza — evita renderizar duas vezes
+  fetchPromocoes().then(() => {
+    if (!q.value.trim()) renderProdutos();
+  });
 }, 50);
-
-
-    // 3️⃣ PROMOÇÕES EM SEGUNDO PLANO (SEM BLOQUEAR)
-    fetchPromocoes().then(() => {
-      renderProdutos(); // atualiza preços se tiver promoção
-    });
 
   } catch (e) {
     console.error('Erro produtos', e);
@@ -1921,6 +1924,8 @@ setTimeout(() => {
       CARROSSEL POR CATEGORIA
 =============================== */
 
+let _renderGeracaoAtual = 0; // controla qual cadeia de rAF é a ativa
+
 function renderCategoriasComCarrossel(lista) {
   const container = document.getElementById("productsGrid");
   container.innerHTML = "";
@@ -1934,7 +1939,12 @@ function renderCategoriasComCarrossel(lista) {
   const categorias = Object.keys(grupos);
   let index = 0;
 
+  // Cada chamada ganha um ID único — cadeias antigas se auto-cancelam
+  const minhaGeracao = ++_renderGeracaoAtual;
+
   function renderProxima() {
+    // Se uma nova renderização foi iniciada, esta cadeia para imediatamente
+    if (minhaGeracao !== _renderGeracaoAtual) return;
     if (index >= categorias.length) return;
 
     const cat = categorias[index++];
