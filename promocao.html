@@ -188,8 +188,12 @@
     document.getElementById('formPromocao').addEventListener('submit', async (e) => {
       e.preventDefault();
 
+      const selectEl = document.getElementById('produtoSelect');
+      const nomeProduto = selectEl.options[selectEl.selectedIndex].text;
+
       const dados = {
-        produto_id: document.getElementById('produtoSelect').value,
+        produto_id: selectEl.value,
+        nome_produto: nomeProduto,   // ← salva o nome junto para compatibilidade
         tipo: document.getElementById('tipoDesconto').value,
         valor: document.getElementById('valorDesconto').value,
         data_fim: document.getElementById('dataFim').value

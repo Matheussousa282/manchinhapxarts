@@ -1873,6 +1873,8 @@ setTimeout(() => {
   try {
     const r = await fetch(API_BASE + '/promocoes');
     promocoes = await r.json();
+    // DEBUG: loga o que a API retornou para diagnóstico
+    console.log('[PROMOÇÕES CARREGADAS]', JSON.stringify(promocoes));
   } catch(e) {
     promocoes = [];
     console.error('Erro ao buscar promoções', e);
@@ -1881,22 +1883,38 @@ setTimeout(() => {
 
   function aplicarPromocao(prod){
     const precoOriginal = Number(prod.preco || 0);
-    // comparação robusta: ignora maiúsculas/minúsculas e espaços extras
+
+    // Casa promoção por produto_id (como o formulário salva) OU por nome_produto (fallback via JOIN da API)
     const nomeProdNorm = (prod.nome || '').trim().toLowerCase();
     const promo = promocoes.find(p => {
+      if (p.ativo === false) return false;
+      // 1) por produto_id — modo principal
+      const porId = p.produto_id != null && Number(p.produto_id) === Number(prod.id);
+      // 2) por nome_produto — fallback
       const nomePromoNorm = (p.nome_produto || '').trim().toLowerCase();
-      return nomePromoNorm === nomeProdNorm && p.ativo !== false;
+      const porNome = nomePromoNorm.length > 0 && nomePromoNorm === nomeProdNorm;
+      return porId || porNome;
     });
-    if(!promo) return { preco: precoOriginal, label: null };
-    if(promo.data_fim && new Date(promo.data_fim) < new Date()) return { preco: precoOriginal, label: null };
+
+    if (!promo) return { preco: precoOriginal, label: null };
+
+    // Verifica validade — considera fim do dia da data_fim
+    if (promo.data_fim) {
+      const fim = new Date(promo.data_fim);
+      fim.setHours(23, 59, 59, 999);
+      if (fim < new Date()) return { preco: precoOriginal, label: null };
+    }
+
     const valor = Number(promo.valor);
-    if(isNaN(valor) || valor <= 0) return { preco: precoOriginal, label: null };
-    if(promo.tipo === 'percentual'){
+    if (isNaN(valor) || valor <= 0) return { preco: precoOriginal, label: null };
+
+    if (promo.tipo === 'percentual') {
       const preco = precoOriginal * (1 - valor / 100);
       return { preco, label: `${valor}% OFF` };
     }
+    // fixo
     const preco = precoOriginal - valor;
-    return { preco: Math.max(0, preco), label: `- R$ ${valor.toFixed(2)}` };
+    return { preco: Math.max(0, preco), label: `- R\$ ${valor.toFixed(2)}` };
   }
 
  /* ===============================
