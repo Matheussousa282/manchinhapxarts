@@ -46,16 +46,38 @@ header{
 @media(max-width:420px){.grid{grid-template-columns:1fr}}
 
 .card{background:var(--card);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px;box-shadow:0 6px 18px rgba(0,0,0,0.6)}
-.thumb{height:160px;border-radius:8px;background:#0a0a0a;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.thumb img{width:100%;height:100%;object-fit:cover}
+
+/* =============================================
+   CORREÇÃO: thumb e imagem sempre fixos
+   ============================================= */
+.thumb {
+  height: 160px;
+  border-radius: 8px;
+  background: #0a0a0a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;      /* impede imagem de vazar */
+  flex-shrink: 0;        /* impede compressão vertical */
+  width: 100%;
+}
+
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;        /* remove espaço extra embaixo */
+  flex-shrink: 0;
+}
+
 .title{font-weight:600;font-size:1rem;color: #000 !important; }
 .price{font-weight:700;color:var(--accent)}
 .actions{display:flex;gap:8px;margin-top:auto}
 .btn{flex:1;padding:8px 10px;border-radius:8px;border:none;cursor:pointer;font-weight:600}
 .btn.info{background:transparent;border:1px solid rgba(219, 19, 19, 0.06);color:var(--white)}
 .btn.buy {
-    background: #000 !important;   /* fundo preto */
-    color: #fff !important;         /* texto branco */
+    background: #000 !important;
+    color: #fff !important;
 }
 
 
@@ -70,7 +92,7 @@ header{
   position: relative;
   width: 100%;
   height: 280px;
-  overflow: hidden;          /* clip dos slides — NÃO pode ser visible */
+  overflow: hidden;
   border-radius: 10px;
   background: #0a0a0a;
 }
@@ -179,7 +201,7 @@ header{
 /* floating cart button (estilo WhatsApp) */
 .cart-float {
   position: fixed;
-  bottom: 110px; /* above whatsapp button */
+  bottom: 110px;
   right: 22px;
   width: 55px;
   height: 55px;
@@ -222,7 +244,7 @@ header{
   box-shadow:0 2px 6px rgba(0,0,0,0.5);
 }
 
-/* whatsapp float (kept as before) */
+/* whatsapp float */
 .whatsapp-float {
   position: fixed;
   bottom: 22px;
@@ -250,7 +272,7 @@ footer{padding:28px 18px;color:var(--muted);text-align:center}
 }
 
 
-/* banners (kept) */
+/* banners */
 .banner-carousel {
   position: relative;
   width: 100%;
@@ -302,14 +324,17 @@ footer{padding:28px 18px;color:var(--muted);text-align:center}
   }
 }
 
+/* =============================================
+   CORREÇÃO: product-card sempre com tamanho fixo
+   ============================================= */
 .product-card {
   min-width: 220px;
   flex-shrink: 0;
+  overflow: hidden;      /* impede qualquer conteúdo de vazar */
+  min-width: 0;          /* necessário em flex/grid para não esticar */
 }
 
-
-
-/* product arrow buttons (made round like banner) */
+/* product arrow buttons */
 #prevProducts, #nextProducts {
   position: absolute;
   top: 50%;
@@ -327,7 +352,7 @@ footer{padding:28px 18px;color:var(--muted);text-align:center}
 #prevProducts { left: 8px; }
 #nextProducts { right: 8px; }
 
-/* checkout modal and placa/luminoso modals */
+/* checkout modal */
 .checkout-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.55); display: flex; justify-content: center; align-items: center; z-index: 9999; }
 .checkout-box { background: #121212; padding: 25px; border-radius: 12px; width: 90%; max-width: 420px; color: white; position: relative; }
 .checkout-box input, .checkout-box textarea { width: 100%; padding: 10px; background: #1d1d1d; border: 1px solid #333; border-radius: 8px; color: white; margin-bottom: 12px; }
@@ -338,15 +363,15 @@ footer{padding:28px 18px;color:var(--muted);text-align:center}
 .modal-placa-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.65); display: none; justify-content: center; align-items: center; z-index: 999999; }
 .modal-placa-box {
     width: 90%;
-    max-width: 380px; /* diminuímos o tamanho */
+    max-width: 380px;
     background: #161616;
-    padding: 18px; /* padding menor */
+    padding: 18px;
     border-radius: 14px;
     color: #fff;
     animation: placaZoom .25s ease;
     box-shadow: 0 0 20px rgba(0,0,0,0.4);
-    max-height: 85vh;         /* impede de ultrapassar tela */
-    overflow-y: auto;         /* ativa rolagem se necessário */
+    max-height: 85vh;
+    overflow-y: auto;
 }
 @keyframes placaZoom { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 .modal-placa-box input, .modal-placa-box textarea { width: 100%; margin-bottom: 10px; padding: 10px; border-radius: 8px; border: 1px solid #333; background: #111; color: white; }
@@ -358,7 +383,6 @@ footer{padding:28px 18px;color:var(--muted);text-align:center}
 }
 
 /* ===== MODAL PADRONIZADO ===== */
-
 .modal {
   position: fixed;
   inset: 0;
@@ -367,12 +391,12 @@ footer{padding:28px 18px;color:var(--muted);text-align:center}
   align-items: center;
   justify-content: center;
   padding: 20px;
-  z-index: 10000; /* acima das setas do banner (9999) */
+  z-index: 10000;
 }
 
 .modal .dialog {
   width: 100%;
-  max-width: 460px;       /* TAMANHO FIXO */
+  max-width: 460px;
   height: auto;
   background: #161616;
   border-radius: 14px;
@@ -382,14 +406,8 @@ footer{padding:28px 18px;color:var(--muted);text-align:center}
   gap: 14px;
   position: relative;
   box-shadow: 0 0 25px rgba(0,0,0,0.5);
-  overflow: visible !important;       /* evita esticar */
+  overflow: visible !important;
 }
-
-/* Regra removida — .carousel já tem height/overflow corretos globalmente */
-
-/* (carousel-track definido acima no bloco do wrapper) */
-
-
 
 /* Botões */
 .modal .close {
@@ -419,7 +437,7 @@ footer{padding:28px 18px;color:var(--muted);text-align:center}
 #modalPrice {
   font-size: 18px;
   font-weight: 700;
-  color: #000 !important; /* PRETO */
+  color: #000 !important;
 }
 
 #qty {
@@ -428,19 +446,10 @@ footer{padding:28px 18px;color:var(--muted);text-align:center}
 }
 
 
-
-
-/* --- CORREÇÃO DEFINITIVA DO MODAL NO MOBILE --- */
-
-
   .carousel-track img {
     height: 100% !important;
     object-fit: cover;
 }
-
-
-
-
 
   #modalTitle {
     font-size: 18px !important;
@@ -463,8 +472,6 @@ footer{padding:28px 18px;color:var(--muted);text-align:center}
     padding: 10px !important;
     font-size: 14px !important;
   }
-
-
 
 #fullTrack {
     pointer-events: none;
@@ -498,14 +505,24 @@ footer{padding:28px 18px;color:var(--muted);text-align:center}
   scroll-behavior: smooth;
   padding: 8px 0;
   flex-wrap: nowrap;
-
-  /* ESSENCIAL NO MOBILE */
   touch-action: auto;
   -webkit-overflow-scrolling: touch;
 }
 
 .categoria-track::-webkit-scrollbar {
   height: 0;
+}
+
+/* =============================================
+   CORREÇÃO: cards dentro do carrossel de categoria
+   com largura fixa para não esticar
+   ============================================= */
+.categoria-track .product-card {
+  min-width: 200px;
+  max-width: 200px;
+  width: 200px;
+  flex-shrink: 0;
+  overflow: hidden;
 }
 
 .cat-arrow {
@@ -544,20 +561,20 @@ footer{padding:28px 18px;color:var(--muted);text-align:center}
   .modal .dialog {
     max-height: 90vh;
     overflow-y: auto !important;
-    padding-bottom: 20px; /* espaço para o botão aparecer */
+    padding-bottom: 20px;
   }
 }
 
 .modal .dialog {
   display: flex;
   flex-direction: column;
-  height: 92vh; /* altura do modal toda */
+  height: 92vh;
 }
 
 .modal .dialog .conteudo-modal {
   overflow-y: auto;
   padding-right: 8px;
-  flex: 1; /* ocupa o restante do espaço */
+  flex: 1;
 }
 
 
@@ -571,7 +588,7 @@ footer{padding:28px 18px;color:var(--muted);text-align:center}
 @media (max-width: 600px) {
     .banner-carousel,
     .banner-track img {
-        height: 160px !important; /* banner menor e sem cortar */
+        height: 160px !important;
     }
 }
 
@@ -587,64 +604,60 @@ footer{padding:28px 18px;color:var(--muted);text-align:center}
   width: 55px;
   height: 55px;
   object-fit: cover;
-  border-radius: 12px; /* deixe redondo se quiser */
+  border-radius: 12px;
 }
 
 /* ============================
-   🎨 TEMA CLARO COMPLETO
+   TEMA CLARO COMPLETO
    ============================ */
-
-/* Fundo geral */
 body {
     background: #f5f5f5 !important;
     color: #000 !important;
 }
 
-/* Header */
 header {
     background: #ffffff !important;
     color: #000 !important;
     border-bottom: 1px solid #ddd !important;
 }
 
-/* Campos de busca */
 .search input {
     background: #ffffff !important;
     color: #000 !important;
     border: 1px solid #ccc !important;
 }
 
-/* Cards */
+/* =============================================
+   CORREÇÃO PRINCIPAL: card no tema claro
+   com overflow hidden para não vazar imagem
+   ============================================= */
 .product-card {
     background: #ffffff !important;
     border: 1px solid #e6e6e6 !important;
     border-radius: 12px !important;
     color: #000 !important;
+    overflow: hidden !important;
+    min-width: 0 !important;
 }
 
-/* Nome do produto */
 .product-card .title {
     color: #000 !important;
     font-weight: 600 !important;
 }
 
-/* Categoria */
 .product-card div[style*="color:var(--muted)"],
 .product-card .categoria {
     color: #333 !important;
 }
 
-/* Preço normal */
 .product-card .price {
     color: #000 !important;
 }
 
-/* Preço promocional */
 .product-card .price div {
     color: #d32f2f !important;
 }
 
-/* Botões dentro dos cards */
 .btn.info {
     background: #f0f0f0 !important;
     color: #000 !important;
@@ -656,19 +669,16 @@ header {
     color: #fff !important;
 }
 
-/* Carrossel de categorias */
 .categoria-carrossel {
     background: #ffffff !important;
 }
 
-/* Setas do carrossel */
 .cat-btn {
     background: #ffffff !important;
     border: 1px solid #ccc !important;
     color: #000 !important;
 }
 
-/* Dots indicadores */
 .cat-dot {
     background: #999 !important;
 }
@@ -677,7 +687,6 @@ header {
     background: #000 !important;
 }
 
-/* Modal (detalhes do produto) */
 .modal .dialog {
     background: #ffffff !important;
     color: #000 !important;
@@ -691,7 +700,6 @@ header {
     color: #000 !important;
 }
 
-/* Carrinho */
 .cart {
     background: #ffffff !important;
     color: #000 !important;
@@ -702,7 +710,6 @@ header {
     color: #000 !important;
 }
 
-/* Botão flutuante do carrinho */
 .cart-float {
     background: #d0cccc !important;
 }
@@ -712,7 +719,6 @@ header {
     color: #fff !important;
 }
 
-/* Footer */
 footer {
     color: #000 !important;
     background: #f7f7f7 !important;
@@ -738,7 +744,6 @@ footer {
   box-shadow: 0 4px 14px rgba(0,0,0,0.12);
 }
 
-/* Botão LIMPAR */
 #clearFilters {
   background: #f04a4a;
   border: none;
@@ -753,7 +758,7 @@ footer {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
-  margin-top: 20px !important;  /* AQUI — descola dos banners */
+  margin-top: 20px !important;
 }
 
 /* ===== DESKTOP ===== */
@@ -766,7 +771,7 @@ footer {
 
 .logo-topo {
     width: 90px;
-    border-radius: 20px; /* arredondamento */
+    border-radius: 20px;
 }
 
 .linha-baixo {
@@ -778,11 +783,9 @@ footer {
 .campo-pesquisa {
     padding: 8px;
     font-size: 15px;
-    border-radius: 20px; /* borda arredondada */
+    border-radius: 20px;
     border: 1px solid #ccc;
 }
-
-
 
 /* ===== MOBILE ===== */
 @media (max-width: 600px) {
@@ -795,13 +798,11 @@ footer {
         gap: 10px;
     }
 
-    /* Logo centralizada e arredondada */
     .logo-topo {
         width: 130px;
-        border-radius: 25px; /* mais arredondado no mobile */
+        border-radius: 25px;
     }
 
-    /* Linha com 2 colunas */
     .linha-baixo {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -817,23 +818,19 @@ footer {
         color: #000;
     }
 
-    /* Pesquisa arredondada */
     .campo-pesquisa {
         width: 100%;
         padding: 12px;
         text-align: right;
-        border-radius: 25px; /* bem arredondado */
+        border-radius: 25px;
         border: 1px solid #aaa;
     }
 }
 
-/* ---- Estilo padrão (PC) ---- */
 .sub-frase {
-    display: none; /* some no PC */
+    display: none;
 }
 
-
-/* ---- MOBILE ---- */
 @media (max-width: 600px) {
 
     .sub-frase {
@@ -854,7 +851,6 @@ footer {
         gap: 2px;
     }
 
-    /* Nome da loja fica no canto esquerdo */
     .nome-loja {
         grid-column: 1;
         grid-row: 1;
@@ -863,16 +859,14 @@ footer {
         color: #000;
     }
 
-    /* Frase fica logo abaixo */
     .sub-frase {
         grid-column: 1;
         grid-row: 2;
     }
 
-    /* Barra de pesquisa à direita */
     .campo-pesquisa {
         grid-column: 2;
-        grid-row: 1 / span 2; /* ocupa duas linhas */
+        grid-row: 1 / span 2;
         width: 100%;
         padding: 12px;
         border-radius: 25px;
@@ -882,14 +876,13 @@ footer {
     .search input {
     width: 100%;
     padding: 10px 14px;
-    border-radius: 12px; /* borda mais arredondada se quiser */
+    border-radius: 12px;
     border: 1px solid rgba(255,255,255,0.06);
     background: #0b0b0b;
     color: var(--white);
-    text-align: left; /* texto digitado na esquerda */
+    text-align: left;
 }
 
-/* Placeholder alinhado à esquerda */
 .search input::placeholder {
     text-align: left;
     color: #aaaaaa;
@@ -897,23 +890,20 @@ footer {
 }
 
 
-/* Ajuste do botão de menu no mobile */
 @media (max-width: 600px) {
   #btnMenu {
-    margin-left: -10px !important; /* empurra mais para o canto */
+    margin-left: -10px !important;
     margin-right: 0 !important;
     position: relative;
-    left: -145px; /* ajuste fino opcional */
+    left: -145px;
   }
 }
 
 #modalDesc {
-  color: #232222 !important;   /* mude a cor aqui */
+  color: #232222 !important;
   font-size: 14px;
   line-height: 1.5;
 }
-
-/* ===== AJUSTES DO MODAL ===== */
 
 #modalPrice {
   color: #000 !important;
@@ -931,7 +921,7 @@ footer {
 }
 
 
-/* SKELETON LOADER PARA OS PRODUTOS */
+/* SKELETON LOADER */
 .skeleton-card {
   background: #e3e3e3;
   border-radius: 12px;
@@ -964,20 +954,19 @@ footer {
 /* FIX ABSOLUTO PARA iPHONE */
 @supports (-webkit-touch-callout: none) {
 
-    /* força o tamanho REAL dos cards */
     .product-card,
     .categoria-track .product-card {
-        min-width: 150px !important;  /* antes estava 170–220 */
+        min-width: 150px !important;
         max-width: 150px !important;
+        overflow: hidden !important;
     }
 
-    /* reduz a imagem */
     .product-card .thumb,
     .categoria-track .thumb {
         height: 115px !important;
+        overflow: hidden !important;
     }
 
-    /* fonte menor */
     .product-card .title {
         font-size: 13px !important;
     }
@@ -1012,22 +1001,21 @@ footer {
   align-items: center;
   gap: 8px;
   font-size: 15px;
-  color: #fff; /* ou #000 se estiver no tema claro */
+  color: #fff;
   cursor: pointer;
 }
 
 .radio-opcao input {
   width: 18px;
   height: 18px;
-  accent-color: #fdd835; /* cor amarela personalizada */
+  accent-color: #fdd835;
   cursor: pointer;
 }
 
-/* ALINHAR BOTÃO CONFIRMAR PEDIDO */
 .btn-confirmar-pedido {
     display: block;
-    margin: 12px auto 0 auto; /* centraliza horizontalmente */
-    width: 100%;              /* ocupa toda a largura da caixa */
+    margin: 12px auto 0 auto;
+    width: 100%;
     text-align: center;
 }
 
@@ -1042,14 +1030,13 @@ footer {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  z-index: 999999999; /* fica na frente de tudo */
+  z-index: 999999999;
   font-family: Poppins, sans-serif;
   color: #000;
   text-align: center;
   padding: 20px;
 }
 
-/* Texto pulsando */
 .loading-text {
   font-size: 22px;
   font-weight: 700;
@@ -1063,26 +1050,22 @@ footer {
 }
 
 /* ===== CORREÇÃO DAS SETINHAS ===== */
-/* .carousel NÃO entra aqui — ele precisa de overflow:hidden para clipar os slides */
 .banner-carousel,
 .categoria-wrap {
   overflow: visible !important;
 }
 
-/* Setas do BANNER e do MODAL do produto — precisam ficar visíveis */
 #prevBanner,
 #nextBanner {
   z-index: 9999 !important;
   pointer-events: auto !important;
 }
 
-/* Setas do carrossel do modal — ficam dentro do modal (z-index 10000) */
 #prevImg,
 #nextImg {
   pointer-events: auto !important;
 }
 
-/* Setas das categorias — z-index baixo para NÃO aparecer sobre o modal */
 .cat-arrow {
   z-index: 10 !important;
   pointer-events: auto !important;
@@ -1109,10 +1092,7 @@ footer {
 
     <div class="linha-baixo">
         <h1 class="nome-loja">Manchinha Px Arts</h1>
-
-        <!-- AQUI ENTRA A FRASE -->
         <p class="sub-frase">Acessórios para Caminhão</p>
-
         <input type="text" id="q" class="campo-pesquisa" placeholder="Pesquisar...">
     </div>
 </header>
@@ -1127,9 +1107,6 @@ footer {
   <button class="arrow-btn arrow-right" id="nextBanner">❯</button>
 </section>
 
-  
-
-  <!-- AQUI — COLOQUE OS FILTROS -->
 <div class="filters">
   <select id="filterCategoria"><option value="">Todas categorias</option></select>
   <select id="sort"><option value="recent">Mais recentes</option>
@@ -1152,7 +1129,6 @@ footer {
   <div class="dialog" role="dialog" aria-modal="true" >
 
     <button class="close" id="closeModal" style="position:absolute;top:14px;right:14px">✕</button>
-    <!-- carrossel do modal: wrapper externo p/ setas, .carousel com overflow:hidden p/ clip -->
     <div class="carousel-wrapper">
       <button class="arrow-btn arrow-left" id="prevImg">❮</button>
       <div class="carousel">
@@ -1165,8 +1141,6 @@ footer {
 
       <h3 id="modalTitle"></h3>
 
- <!-- ===== SELECTOR DE TAMANHO — MODELO PADRÃO ===== -->
-<!-- 🔵 SOMENTE PARA BONÉ PERSONALIZADO -->
 <div id="infoBone" 
      style="display:none; 
             background:#fff3cd;
@@ -1185,13 +1159,11 @@ footer {
   ⚠️ <b>Atenção:</b> Consulte as cores disponíveis no WhatsApp ao finalizar o pedido.
 
   <div style="margin-top:10px;">
-    <!-- Radio 1 -->
     <label style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
       <input type="radio" name="opcaoBone" value="45" checked>
       Unidade — R$ 45,00
     </label>
 
-    <!-- Radio 2 -->
     <label style="display:flex; align-items:center; gap:8px;">
       <input type="radio" name="opcaoBone" value="35">
       Acima de 10 unidades — R$ 35,00
@@ -1199,7 +1171,6 @@ footer {
   </div>
 </div>
 
-<!-- 🔵 SOMENTE PARA PRODUTOS DA CATEGORIA CAMISA -->
 <div id="infoCamisas"
      style="display:none;
             background:#e8f4ff;
@@ -1227,7 +1198,6 @@ footer {
 </div>
 
 
-   <!-- 🔵 SOMENTE PARA PERSONALIZE SUA CAMISA -->
 <div id="infoPersCamisa"
      style="display:none;
             background:#fff3cd;
@@ -1273,7 +1243,6 @@ footer {
 </div>
 
 
-      <!-- SOMENTE PARA CATEGORIA BANDEIRA -->
 <div id="artePersonalizadaBox" style="display:none; border:1px solid #ddd;padding:12px;border-radius:10px;background:#f9f9f9;color:#000;">
   <h4 style="margin:0 0 8px 0; font-size:16px;">🎨 Arte Personalizada</h4>
 
@@ -1288,7 +1257,6 @@ footer {
   </label>
 </div>
 
-<!-- 🔵 SOMENTE PARA LUMINOSO ACRÍLICO -->
 <div id="infoLumAcrilico"
      style="display:none;
             background:#fff3cd;
@@ -1314,7 +1282,6 @@ footer {
 
 </div>
 
-<!-- 🔵 SELECT PARA BRASÃO GRADE DO CAPÔ -->
 <div id="infoBrasaCapo"
      style="display:none;
             background:#fff3cd;
@@ -1596,8 +1563,6 @@ footer {
     transition: .3s ease;
     z-index: 99999;
     padding: 20px;
-
-/* 🔥 ESSENCIAL */
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
 ">
@@ -1642,8 +1607,6 @@ function debounce(fn, delay = 300) {
 
 
 document.addEventListener('DOMContentLoaded', () => {
-  /* UI Refs */
-  // Mostrar overlay de carregamento
   const loadingOverlay = document.getElementById("loadingOverlay");
   const grid = document.getElementById('productsGrid');
   const prodCount = document.getElementById('prodCount');
@@ -1662,7 +1625,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const addToCartModal = document.getElementById('addToCartModal');
   const cartFloat = document.getElementById('cartFloat');
 
-  // abrir modal ENTREGA ao selecionar "entrega"
 document.querySelectorAll("input[name='tipoEntrega']").forEach(r => {
   r.addEventListener("change", e => {
     if (e.target.value === "entrega") {
@@ -1671,12 +1633,10 @@ document.querySelectorAll("input[name='tipoEntrega']").forEach(r => {
   });
 });
 
-// fechar modal
 document.getElementById("cancelEntrega").onclick = () => {
   document.getElementById("modalEntrega").style.display = "none";
 };
 
-// salvar dados de entrega
 document.getElementById("btnEnviarEntrega").onclick = () => {
   const dadosEntrega = {
     endereco: document.getElementById("ent_endereco").value.trim(),
@@ -1729,7 +1689,6 @@ document.getElementById("btnEnviarEntrega").onclick = () => {
     let startX;
     let scrollLeft;
 
-    // --- MOBILE TOUCH ---
     track.addEventListener("touchstart", (e) => {
         startX = e.touches[0].pageX;
         scrollLeft = track.scrollLeft;
@@ -1737,11 +1696,10 @@ document.getElementById("btnEnviarEntrega").onclick = () => {
 
     track.addEventListener("touchmove", (e) => {
         const x = e.touches[0].pageX;
-        const walk = (startX - x) * 1.5; // velocidade
+        const walk = (startX - x) * 1.5;
         track.scrollLeft = scrollLeft + walk;
     });
 
-    // --- PC MOUSE DRAG ---
     track.addEventListener("mousedown", (e) => {
         isDown = true;
         startX = e.pageX;
@@ -1792,11 +1750,9 @@ function mostrarSkeletons() {
 }
 
 
-  /* Fetch produtos/promocoes */
   function renderProdutosSimples(lista) {
   const grid = document.getElementById("productsGrid");
 
-  // mostra só os primeiros (carrega rápido)
   grid.innerHTML = lista.slice(0, 12).map(p => {
     let img = "/placeholder.png";
 
@@ -1828,7 +1784,6 @@ function mostrarSkeletons() {
   function preencherFiltroCategorias() {
   const select = document.getElementById("filterCategoria");
 
-  // evita duplicar categorias
   select.innerHTML = `<option value="">Todas categorias</option>`;
 
   const categoriasUnicas = [...new Set(
@@ -1848,18 +1803,14 @@ function mostrarSkeletons() {
     const r = await fetch(API_BASE + '/produtos');
     produtos = await r.json();
 
-/* 🚀 1️⃣ MOSTRA PRODUTOS IMEDIATAMENTE */
 renderProdutosSimples(produtos);
 
-/* 🚀 2️⃣ ESCONDE LOADING AGORA */
 loadingOverlay.style.display = "none";
 
-/* ⚙️ 3️⃣ ORGANIZA TUDO DEPOIS (SEM TRAVAR) */
 setTimeout(() => {
   renderMenuCategorias();
   preencherFiltroCategorias();
 
-  // Busca promoções e só então renderiza — evita renderizar duas vezes
   fetchPromocoes().then(() => {
     if (!q.value.trim()) renderProdutos();
   });
@@ -1876,7 +1827,6 @@ setTimeout(() => {
   try {
     const r = await fetch(API_BASE + '/promocoes');
     promocoes = await r.json();
-    // DEBUG: loga o que a API retornou para diagnóstico
     console.log('[PROMOÇÕES CARREGADAS]', JSON.stringify(promocoes));
   } catch(e) {
     promocoes = [];
@@ -1887,13 +1837,10 @@ setTimeout(() => {
   function aplicarPromocao(prod){
     const precoOriginal = Number(prod.preco || 0);
 
-    // Casa promoção por produto_id (como o formulário salva) OU por nome_produto (fallback via JOIN da API)
     const nomeProdNorm = (prod.nome || '').trim().toLowerCase();
     const promo = promocoes.find(p => {
       if (p.ativo === false) return false;
-      // 1) por produto_id — modo principal
       const porId = p.produto_id != null && Number(p.produto_id) === Number(prod.id);
-      // 2) por nome_produto — fallback
       const nomePromoNorm = (p.nome_produto || '').trim().toLowerCase();
       const porNome = nomePromoNorm.length > 0 && nomePromoNorm === nomeProdNorm;
       return porId || porNome;
@@ -1901,7 +1848,6 @@ setTimeout(() => {
 
     if (!promo) return { preco: precoOriginal, label: null };
 
-    // Verifica validade — considera fim do dia da data_fim
     if (promo.data_fim) {
       const fim = new Date(promo.data_fim);
       fim.setHours(23, 59, 59, 999);
@@ -1915,16 +1861,11 @@ setTimeout(() => {
       const preco = precoOriginal * (1 - valor / 100);
       return { preco, label: `${valor}% OFF` };
     }
-    // fixo
     const preco = precoOriginal - valor;
     return { preco: Math.max(0, preco), label: `- R\$ ${valor.toFixed(2)}` };
   }
 
- /* ===============================
-      CARROSSEL POR CATEGORIA
-=============================== */
-
-let _renderGeracaoAtual = 0; // controla qual cadeia de rAF é a ativa
+let _renderGeracaoAtual = 0;
 
 function renderCategoriasComCarrossel(lista) {
   const container = document.getElementById("productsGrid");
@@ -1939,11 +1880,9 @@ function renderCategoriasComCarrossel(lista) {
   const categorias = Object.keys(grupos);
   let index = 0;
 
-  // Cada chamada ganha um ID único — cadeias antigas se auto-cancelam
   const minhaGeracao = ++_renderGeracaoAtual;
 
   function renderProxima() {
-    // Se uma nova renderização foi iniciada, esta cadeia para imediatamente
     if (minhaGeracao !== _renderGeracaoAtual) return;
     if (index >= categorias.length) return;
 
@@ -1982,7 +1921,6 @@ function renderCategoriasComCarrossel(lista) {
           : `data:image/jpeg;base64,${p.imagem_base64}`;
       }
 
-      // ===== PREÇO COM PROMOÇÃO =====
       const promo = aplicarPromocao(p);
       const precoOrig = Number(p.preco || 0);
       const priceHtml = (promo.label && promo.preco < precoOrig)
@@ -2025,7 +1963,6 @@ window.scrollCategoria = function (cat, dir) {
     track.scrollBy({ left: dir * 300, behavior: "smooth" });
 };
 
-// Impedir página de rolar enquanto arrasta o carrossel
 function ativarTravamentoDeScroll(track) {
     let startX = 0;
     let startY = 0;
@@ -2041,18 +1978,15 @@ function ativarTravamentoDeScroll(track) {
         const dx = e.touches[0].clientX - startX;
         const dy = e.touches[0].clientY - startY;
 
-        // Detecta se o movimento é horizontal
         if (!isHorizontal && Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 10) {
             isHorizontal = true;
         }
 
-        // Se for HORIZONTAL → trava scroll vertical e move o carrossel
         if (isHorizontal) {
             e.preventDefault(); 
             track.scrollLeft -= dx;
         }
 
-        // Atualiza ponto atual
         startX = e.touches[0].clientX;
         startY = e.touches[0].clientY;
     }, { passive: false });
@@ -2080,7 +2014,6 @@ function ativarTravamentoDeScroll(track) {
 
   function escapeHtml(text){ return String(text||'').replace(/[&<>"']/g, s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[s]); }
 
-  /* Cart functions */
   function saveCart(){ localStorage.setItem('mp_cart', JSON.stringify(cart)); updateCartUI(); }
   function updateCartUI(){
     const count = cart.reduce((s,i)=>s + (i.qt||0), 0);
@@ -2091,13 +2024,12 @@ function ativarTravamentoDeScroll(track) {
           const prod = produtos.find(p=>p.id==it.id) || {};
           let imgCart = '/placeholder.png';
 
-// IMAGEM PERSONALIZADA PARA A TAXA DE ARTE
 if (it.id === 999999) {
     return `
         <div class="item">
             <img src="/public/icone-tax.png" alt="Taxa de Arte" style="width:56px;height:56px;object-fit:cover;border-radius:8px;">
             <div style="flex:1">
-                <div style="font-weight:600">Taxa de Arte Personalizada</div>
+                <div style="font-weight:600">Taxa de Arte Bandeira Personalizada</div>
                 <div style="color:var(--muted)">${money(it.price)}</div>
             </div>
             <div style="display:flex;flex-direction:column;gap:6px">
@@ -2137,13 +2069,11 @@ if (it.id === 999999) {
     if(existing) existing.qt += qtd;
     else cart.push({ id: prod.id, qt: qtd, price: Number(promo.preco || prod.preco) });
     saveCart();
-    /*openCart(); habilitar so por nescessidade do cliente*/ 
   }
   function increase(id){ const it = cart.find(i=>i.id==id); if(it){ it.qt++; saveCart(); } }
   function decrease(id){ const it = cart.find(i=>i.id==id); if(it){ it.qt--; if(it.qt<=0) cart = cart.filter(x=>x.id!=id); saveCart(); } }
   function clearCart(){ if(confirm('Limpar carrinho?')){ cart = []; saveCart(); } }
 
-  /* product modal */
   let currentIndex = 0;
   let currentImagens = [];
 
@@ -2170,13 +2100,11 @@ if (it.id === 999999) {
         return `<img loading="lazy" decoding="async" src="${src}" alt="" style="cursor:zoom-in">`;
       }).join('');
 
-      // dots
       dotsEl.innerHTML = currentImagens.length > 1
         ? currentImagens.map((_, i) => `<span class="${i===0?'active':''}"></span>`).join('')
         : '';
       [...dotsEl.children].forEach((d, i) => d.onclick = () => goToSlide(i));
 
-      // fullscreen ao clicar
       track.querySelectorAll('img').forEach((img, i) => {
         img.onclick = () => openFullScreen(currentImagens, i);
       });
@@ -2185,7 +2113,6 @@ if (it.id === 999999) {
     currentIndex = 0;
     track.style.transform = 'translateX(0%)';
 
-    // setas
     document.getElementById('prevImg').onclick = () => {
       if(currentImagens.length) goToSlide((currentIndex - 1 + currentImagens.length) % currentImagens.length);
     };
@@ -2193,7 +2120,6 @@ if (it.id === 999999) {
       if(currentImagens.length) goToSlide((currentIndex + 1) % currentImagens.length);
     };
 
-    // swipe touch no carrossel do modal
     let _swipeX = 0;
     track.ontouchstart = e => { _swipeX = e.touches[0].clientX; };
     track.ontouchend = e => {
@@ -2210,12 +2136,8 @@ if (it.id === 999999) {
  const categoriaProd = (p.categoria_nome || p.categoria || "").toLowerCase().trim();
 const nomeProd = (p.nome || "").toLowerCase().trim();
 
-/* ===============================
-   LUMINOSO EM ACRÍLICO — EXCLUSIVO
-================================ */
 const infoLumAcrilico = document.getElementById("infoLumAcrilico");
 
-// 🔥 SOMENTE ESTE PRODUTO
 const isLuminosoAcrilico = nomeProd === "luminoso em acrílico";
 
 if (isLuminosoAcrilico) {
@@ -2224,7 +2146,6 @@ if (isLuminosoAcrilico) {
 
     const radios = document.querySelectorAll("input[name='opcaoLumAcrilico']");
 
-    // remove eventos antigos (evita bug ao abrir várias vezes)
     radios.forEach(r => {
         const clone = r.cloneNode(true);
         r.replaceWith(clone);
@@ -2232,13 +2153,11 @@ if (isLuminosoAcrilico) {
 
     const novosRadios = document.querySelectorAll("input[name='opcaoLumAcrilico']");
 
-    // padrão: primeira opção
     if (novosRadios.length > 0) {
         novosRadios[0].checked = true;
         modalPrice.textContent = "R$ " + Number(novosRadios[0].value).toFixed(2);
     }
 
-    // troca preço ao mudar tamanho
     novosRadios.forEach(r => {
         r.addEventListener("change", e => {
             modalPrice.textContent = "R$ " + Number(e.target.value).toFixed(2);
@@ -2250,10 +2169,6 @@ if (isLuminosoAcrilico) {
 }
 
 
-
-
-
-// 🔥 ESTA LINHA PRECISA EXISTIR!
 const isCamisasCategoria = categoriaProd.includes("camisas");
 
 const infoBone = document.getElementById("infoBone");
@@ -2275,32 +2190,22 @@ if (nomeProd === "boné personalizados" || nomeProd === "boné personalizado") {
     infoBone.style.display = "none";
 }
 
-/* ============================
-   REGRAS DOS MÓDULOS DE CAMISA
-=============================== */
+const infoCamisas = document.getElementById("infoCamisas");
+const infoPersCamisa = document.getElementById("infoPersCamisa");
 
-
-
-const infoCamisas = document.getElementById("infoCamisas");          // 85 / 65
-const infoPersCamisa = document.getElementById("infoPersCamisa");    // 75 / 55
-
-// 🔵 1 — SE FOR "PERSONALIZE SUA CAMISA" → MOSTRA OS DOIS
 if (nomeProd === "personalize sua camisa") {
 
-    infoCamisas.style.display = "block";       // mostra 85 / 65
-    infoPersCamisa.style.display = "block";    // mostra 75 / 55
+    infoCamisas.style.display = "block";
+    infoPersCamisa.style.display = "block";
 
-    // preço inicial (do personalizado)
     modalPrice.textContent = "R$ 75,00";
 
-    // listeners do módulo 75/55
     document.querySelectorAll("input[name='opcaoPersCamisa']").forEach(r => {
         r.addEventListener("change", e => {
             modalPrice.textContent = "R$ " + Number(e.target.value).toFixed(2);
         });
     });
 
-    // listeners do módulo 85/65
     document.querySelectorAll("input[name='opcaoCamisas']").forEach(r => {
         r.addEventListener("change", e => {
             modalPrice.textContent = "R$ " + Number(e.target.value).toFixed(2);
@@ -2308,13 +2213,12 @@ if (nomeProd === "personalize sua camisa") {
     });
 
 }
-// 🔵 2 — SE FOR CATEGORIA CAMISAS (mas NÃO personalize)
 else if (categoriaProd.includes("camisas")) {
 
-    infoCamisas.style.display = "none";    // mostra só 85/65
-    infoPersCamisa.style.display = "none";  // esconde 75/55
+    infoCamisas.style.display = "none";
+    infoPersCamisa.style.display = "none";
 
-    modalPrice.textContent = "R$ 85,00"; // preço inicial
+    modalPrice.textContent = "R$ 85,00";
 
     document.querySelectorAll("input[name='opcaoCamisas']").forEach(r => {
         r.addEventListener("change", e => {
@@ -2323,22 +2227,16 @@ else if (categoriaProd.includes("camisas")) {
     });
 
 }
-// 🔵 3 — QUALQUER OUTRO PRODUTO → esconder tudo
 else {
     infoCamisas.style.display = "none";
     infoPersCamisa.style.display = "none";
 }
 
 
-
-
-// 🔵 REGRA 1: identificar se é um produto de bandeira comum
 const isBandeiraCategoria = categoriaProd.includes("bandeira");
 
-// 🔵 REGRA 2: identificar se é o produto PERSONALIZE SUA BANDEIRA
 const isPersonalize = nomeProd === "personalize sua bandeira";
 
-// 🔵 MOSTRAR TAMANHOS EM AMBOS OS CASOS
 const tamanhoBox = document.getElementById("tamanhosBandeira");
 if (isBandeiraCategoria || isPersonalize) {
     tamanhoBox.style.display = "block";
@@ -2353,7 +2251,6 @@ if (isBandeiraCategoria || isPersonalize) {
 }
 
 
-// 🔄 AGORA — QUANDO CLICAR NO TAMANHO → ATUALIZA O PREÇO
 document.querySelectorAll("input[name='opcaoTamanho']").forEach(radio => {
     radio.addEventListener("change", e => {
         const precoSelecionado = Number(e.target.dataset.preco);
@@ -2361,7 +2258,6 @@ document.querySelectorAll("input[name='opcaoTamanho']").forEach(radio => {
     });
 });
 
-// 🔵 MOSTRAR TAXA DE ARTE APENAS PARA PERSONALIZE SUA BANDEIRA
 const boxArte = document.getElementById("artePersonalizadaBox");
 if (isPersonalize) {
     boxArte.style.display = "block";
@@ -2369,25 +2265,19 @@ if (isPersonalize) {
     boxArte.style.display = "none";
 } 
 
-/* ===============================
-   BRASÃO GRADE DO CAPÔ — MODELOS
-================================ */
 const infoBrasaCapo = document.getElementById("infoBrasaCapo");
 
-// Detecta qualquer variação do nome
 if (nomeProd.includes("brasão") || nomeProd.includes("brasa") || nomeProd.includes("grade do capo")) {
 
     infoBrasaCapo.style.display = "block";
 
     const radios = document.querySelectorAll("input[name='opcaoBrasaCapo']");
 
-    // Marca primeira opção como padrão
     if (radios.length > 0) {
         radios[0].checked = true;
         modalPrice.textContent = "R$ " + Number(radios[0].value).toFixed(2);
     }
 
-    // Atualiza preço ao trocar
     radios.forEach(r => {
         r.addEventListener("change", e => {
             modalPrice.textContent = "R$ " + Number(e.target.value).toFixed(2);
@@ -2401,7 +2291,6 @@ if (nomeProd.includes("brasão") || nomeProd.includes("brasa") || nomeProd.inclu
 
     const promo = aplicarPromocao(p);
     const precoOrigModal = Number(p.preco || 0);
-    // só aplica preço se NÃO for produto com seletor próprio (boné, bandeira, brasão, luminoso, camisa)
     const temSeletorProprio = isLuminosoAcrilico
       || nomeProd === "boné personalizados" || nomeProd === "boné personalizado"
       || isBandeiraCategoria || isPersonalize
@@ -2426,10 +2315,8 @@ if (nomeProd.includes("brasão") || nomeProd.includes("brasa") || nomeProd.inclu
     addToCartModal.onclick = () => {
     const quantidade = Number(qtyInput.value || 1);
 
-    // remover taxa anterior
     cart = cart.filter(x => x.id !== 999999);
 
-    // 🔵 ADICIONAR BRASÃO GRADE DO CAPÔ
 if (nomeProd.includes("brasão") || nomeProd.includes("brasa") || nomeProd.includes("grade do capo")) {
 
     const r = document.querySelector("input[name='opcaoBrasaCapo']:checked");
@@ -2450,7 +2337,6 @@ if (nomeProd.includes("brasão") || nomeProd.includes("brasa") || nomeProd.inclu
 }
 
 
-    // 🔵 SE FOR PERSONALIZE SUA BANDEIRA: verificar taxa
     if (isPersonalize) {
         const opcao = document.querySelector("input[name='opcaoArte']:checked").value;
 
@@ -2465,7 +2351,6 @@ if (nomeProd.includes("brasão") || nomeProd.includes("brasa") || nomeProd.inclu
         }
     }
 
-    // ----- BONÉ: adicionar com preço selecionado -----
 if (nomeProd === "boné personalizados" || nomeProd === "boné personalizado") {
 
 
@@ -2485,7 +2370,6 @@ if (nomeProd === "boné personalizados" || nomeProd === "boné personalizado") {
 }
 
 
-// 🔵 ADICIONAR LUMINOSO EM ACRÍLICO (EXCLUSIVO)
 if (nomeProd === "luminoso em acrílico") {
 
     const r = document.querySelector("input[name='opcaoLumAcrilico']:checked");
@@ -2507,7 +2391,6 @@ if (nomeProd === "luminoso em acrílico") {
 
 
 
-    // 🔵 SE FOR BANDEIRA NORMAL OU PERSONALIZE: adicionar com tamanhos
     if (isBandeiraCategoria || isPersonalize) {
         const r = document.querySelector("input[name='opcaoTamanho']:checked");
         const tamanho = r.value;
@@ -2525,16 +2408,15 @@ if (nomeProd === "luminoso em acrílico") {
         return;
     }
 
-    // 🔵 ADICIONAR CAMISA PERSONALIZADA AO CARRINHO
      if(nomeProd === "personalize sua camisa") {
        const r = document.querySelector("input[name='opcaoPersCamisa']:checked");
         const preco = Number(r.value); const quantidade = Number(qtyInput.value || 1);
-        const material = r.parentElement.textContent.trim(); // <-- pega o texto do rádio
+        const material = r.parentElement.textContent.trim();
         
         cart.push({ id: p.id,
           qt: quantidade,
           price: preco,
-          material: material // <-- salva no carrinho
+          material: material
            });
         
          saveCart();
@@ -2542,13 +2424,11 @@ if (nomeProd === "luminoso em acrílico") {
            return; }
            
            
-    // 🔵 ADICIONAR CAMISA NO CARRINHO COM O PREÇO ESCOLHIDO
      if ((categoriaProd.includes("camisa")) && nomeProd !== "personalize sua camisa") {
 
     const r = document.querySelector("input[name='opcaoCamisas']:checked");
 
     if (!r) {
-        // se não houver radios, usa o preço normal do produto
         addToCart(p.id, quantidade);
         closeModal();
         return;
@@ -2571,7 +2451,6 @@ if (nomeProd === "luminoso em acrílico") {
 
 
 
-    // 🔵 PRODUTO NORMAL
     addToCart(p.id, quantidade);
     closeModal();
 };
@@ -2583,13 +2462,9 @@ if (nomeProd === "luminoso em acrílico") {
   }
   function closeModal(){ modal.style.display = 'none'; document.body.style.overflow = 'auto'; }
 
-  /* open/close cart */
   function openCart(){ cartEl.classList.add('open'); document.body.style.overflow = 'hidden'; }
   function closeCart(){ cartEl.classList.remove('open'); document.body.style.overflow = 'auto'; }
 
-  
-
-  /* event bindings */
   cartFloat.addEventListener('click', openCart);
   document.getElementById('btnVoltarCarrinho').addEventListener('click', closeCart);
   document.getElementById('btnClear').addEventListener('click', clearCart);
@@ -2597,26 +2472,20 @@ if (nomeProd === "luminoso em acrílico") {
   document.getElementById('btnVoltar').addEventListener('click', closeModal);
   modal.addEventListener('click', (e)=>{ if(e.target === modal) closeModal(); });
 
-  // banner arrow ids
-  document.getElementById('prevBanner').addEventListener('click', ()=>{ /* handled in startBannerCarousel */ });
-  document.getElementById('nextBanner').addEventListener('click', ()=>{ /* handled in startBannerCarousel */ });
+  document.getElementById('prevBanner').addEventListener('click', ()=>{ });
+  document.getElementById('nextBanner').addEventListener('click', ()=>{ });
 
-  // checkout modal controls
   document.getElementById('closeCheckout').addEventListener('click', ()=>{ document.getElementById('checkoutModal').style.display = 'none'; });
-  // Botão Finalizar compra abre o modal de Checkout
 document.getElementById('btnCheckout').addEventListener('click', () => {
     document.getElementById('checkoutModal').style.display = 'flex';
 });
 
-  /* ========== PLACA / LUMINOSO flow ========== */
   const modalPlaca = document.getElementById('modalPlaca');
   const modalLuminoso = document.getElementById('modalLuminoso');
 
-  // cancel buttons
   document.getElementById('cancelPlaca').addEventListener('click', ()=>{ modalPlaca.style.display = 'none'; });
   document.getElementById('cancelLum').addEventListener('click', ()=>{ modalLuminoso.style.display = 'none'; });
 
-  // helpers to collect placa/luminoso values
   function coletarPlaca(){
     return {
       cor: document.getElementById('mp_cor').value.trim(),
@@ -2648,49 +2517,40 @@ document.getElementById('btnCheckout').addEventListener('click', () => {
 }
 
 
-  // main send: builds message based on cart + placa/luminoso data (if present) and opens WhatsApp
   function sendOrder({ placaData = null, lumData = null, faixaData = null, cliente }) {
     const valor_total = cart.reduce((s,i)=>s + ((i.price||0) * (i.qt||0)), 0);
     const resumoItens = cart.map(it => {
 
-  // taxa de arte
   if (it.id === 999999) {
     return `${it.qt} x Taxa de Arte Bandeira Personalizada: R$ ${(it.price).toFixed(2)}`;
   }
 
   const prod = produtos.find(p=>p.id == it.id);
 
-    // 🔵 SE FOR BRASÃO → mostra o MODELO
   if (it.modelo) {
     return `${it.qt} x ${prod?.nome || 'Produto'}
 Modelo: ${it.modelo}
 Valor unitário: R$ ${(it.price).toFixed(2)}`;
   }
 
-   // 🔵 (2) LUMINOSO EM ACRÍLICO — TAMANHO
   if (it.tamanho && (prod?.nome || "").toLowerCase().includes("luminoso")) {
     return `${it.qt} x ${prod?.nome}
 Tamanho: ${it.tamanho}
 Valor unitário: R$ ${(it.price).toFixed(2)}`;
   }
 
-  // Se for bandeira (pois terá tamanho)
   if (it.tamanho) {
     return `${it.qt} x ${prod?.nome || 'Produto'}
 Tamanho: ${it.tamanho}
 Valor unitário: R$ ${(it.price).toFixed(2)}`;
   }
 
-// CAMISAS – mostrar material escolhido
-
-// CAMISAS OU PRODUTO COM MATERIAL
 if (it.material) {
     return `${it.qt} x ${prod?.nome || 'Produto'}
 Material: ${it.material}
 Valor unitário: R$ ${(it.price).toFixed(2)}`;
 }
 
-// PRODUTO NORMAL
 return `${it.qt} x ${prod?.nome || 'Produto'} : R$ ${(it.price).toFixed(2)}`;
 
 
@@ -2768,7 +2628,6 @@ if (faixaData) {
 }
 
 
-        // Recupera dados do modal de entrega
     let dadosEntrega = window.__dados_entrega || null;
 
     let secEntrega = "";
@@ -2810,7 +2669,6 @@ Pedido feito com Manchinha Px Arts`;
 
     const linkWhats = `https://wa.me/5588996077146?text=${encodeURIComponent(mensagem)}`;
     window.open(linkWhats, '_blank');
-    // cleanup
     cart = [];
     saveCart();
     document.getElementById('checkoutModal').style.display = 'none';
@@ -2820,14 +2678,10 @@ Pedido feito com Manchinha Px Arts`;
     alert('Pedido preparado e enviado para o WhatsApp!');
   }
 
-  // Click handlers for modal send buttons
   document.getElementById('btnEnviarPlaca').addEventListener('click', () => {
-    // when clicked in the flow where Placa is required:
     const placaData = coletarPlaca();
-    // store temporarily in window flow store
     window.__order_pending_placa = placaData;
     modalPlaca.style.display = 'none';
-    // if next is luminoso (we flagged earlier), open it, else send
     if(window.__order_pending_next === 'luminoso'){
       modalLuminoso.style.display = 'flex';
     } else {
@@ -2839,21 +2693,17 @@ Pedido feito com Manchinha Px Arts`;
   document.getElementById('btnEnviarLum').addEventListener('click', () => {
     const lumData = coletarLum();
     modalLuminoso.style.display = 'none';
-    // if placa data was previously collected in this flow, include it
     const placaData = window.__order_pending_placa || null;
     const cliente = { nome: document.getElementById('nomeCliente').value.trim() || 'Cliente' };
     sendOrder({ placaData, lumData, cliente });
-    // clear pending flags
     window.__order_pending_placa = null;
     window.__order_pending_next = null;
   });
 
-  // cancelar faixa
 document.getElementById("cancelFaixa").onclick = () => {
   document.getElementById("modalFaixaPersonalizada").style.display = "none";
 };
 
-// enviar informações da faixa
 document.getElementById("btnEnviarFaixa").onclick = () => {
 
   const faixaData = coletarFaixaPersonalizada();
@@ -2870,13 +2720,11 @@ document.getElementById("btnEnviarFaixa").onclick = () => {
 };
 
 
-  // Confirmar checkout main handler: decides the flow
   document.getElementById('confirmarCheckout').addEventListener('click', () => {
     const nome = document.getElementById('nomeCliente').value.trim();
     const telefone = document.getElementById('telefoneCliente').value.trim();
     if(!nome || !telefone){ alert('Por favor, preencha pelo menos o nome e o telefone.'); return; }
 
-    // detect products: check both "Placa Personalizada" variants and "Placas Personalizadas" to be safe
     const temPlaca = cart.some(i => {
       const prod = produtos.find(p=>p.id==i.id);
       if(!prod) return false;
@@ -2904,45 +2752,35 @@ document.getElementById("btnEnviarFaixa").onclick = () => {
       return cat.includes("faixas personalizadas");
     });
 
-    // Se tiver faixas personalizadas → abrir MODAL IMEDIATAMENTE
 if (temFaixaPersonalizada) {
     modalFaixaPersonalizada = document.getElementById("modalFaixaPersonalizada");
     modalFaixaPersonalizada.style.display = "flex";
     return;
 }
 
-
-
-    // No special items -> send directly
-
-    // 1️⃣ FAIXA PERSONALIZADA → sempre abrir primeiro
 if (temFaixaPersonalizada) {
     document.getElementById("modalFaixaPersonalizada").style.display = "flex";
     return;
 }
 
-// 2️⃣ PLACA + LUMINOSO
 if (temPlaca && temLum) {
     window.__order_pending_next = 'luminoso';
     modalPlaca.style.display = 'flex';
     return;
 }
 
-// 3️⃣ Só PLACA
 if (temPlaca && !temLum) {
     window.__order_pending_next = null;
     modalPlaca.style.display = 'flex';
     return;
 }
 
-// 4️⃣ Só LUMINOSO
 if (temLum && !temPlaca) {
     window.__order_pending_next = null;
     modalLuminoso.style.display = 'flex';
     return;
 }
 
-// 5️⃣ Nada especial → mandar direto
 if (!temPlaca && !temLum && !temFaixaPersonalizada) {
     const cliente = { nome };
     sendOrder({ placaData: null, lumData: null, cliente });
@@ -2951,21 +2789,18 @@ if (!temPlaca && !temLum && !temFaixaPersonalizada) {
 
   });
 
-  // Expose some functions globally
   window.addToCart = addToCart;
   window.openProduct = openProduct;
   window.increase = (id)=>{ increase(id); };
   window.decrease = (id)=>{ decrease(id); };
 
-  // Search / filters bindings
   q.addEventListener('input', debounce(renderProdutos, 300));
   filterCategoria.addEventListener('change', renderProdutos);
   sortSel.addEventListener('change', renderProdutos);
   document.getElementById('clearFilters').addEventListener('click', ()=>{ q.value=''; filterCategoria.value=''; sortSel.value='recent'; renderProdutos(); });
 
 
-  // === FULLSCREEN IMAGE ===
-  let fullIndex = 0;  // ← ADICIONEI ESTA LINHA AQUI
+  let fullIndex = 0;
 
 const imgFull = document.getElementById("imgFull");
 const fullTrack = document.getElementById("fullTrack");
@@ -2987,11 +2822,10 @@ function openFullScreen(imagens, startIndex = 0) {
 closeFull.onclick = () => {
   imgFull.style.display = "none";
   document.body.style.overflow = "auto";
-  fullIndex = 0; // reset para não travar a navegação
+  fullIndex = 0;
 };
 
 
-// Swipe lateral (mobile)
 let startX = 0;
 fullTrack.addEventListener("touchstart", e => startX = e.touches[0].clientX);
 fullTrack.addEventListener("touchend", e => {
@@ -3014,7 +2848,6 @@ function fullPrev(){
   }
 }
 
-// ========== MENU LATERAL ==========
 const menu = document.getElementById("menuLateral");
 const mask = document.getElementById("menuMask");
 const btnMenu = document.getElementById("btnMenu");
@@ -3030,7 +2863,6 @@ mask.onclick = () => {
     mask.style.display = "none";
 };
 
-// Montar categorias no menu lateral
 function renderMenuCategorias() {
     const categoriasUnicas = [...new Set(produtos.map(p => p.categoria_nome || p.categoria))];
 
@@ -3043,23 +2875,20 @@ function renderMenuCategorias() {
     `).join("");
 }
 
-// Quando clicar no menu lateral → filtrar produtos
 window.selecionarCategoriaMenu = (cat) => {
     document.getElementById("filterCategoria").value = cat;
     renderProdutos();
 
-    // fechar menu
     menu.style.transform = "translateX(-100%)";
     mask.style.display = "none";
 };
 
 
-  // initial load
   mostrarSkeletons();
 
 setTimeout(() => {
     fetchProdutos();
-}, 3); // tempo IDEAL para o skeleton aparecer
+}, 3);
 
   setTimeout(() => {
   carregarBanners();
