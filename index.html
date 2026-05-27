@@ -1742,6 +1742,24 @@ let promocoes = [];
 let categorias = [];
 let cart = JSON.parse(localStorage.getItem('mp_cart') || '[]');
 
+// ── IntersectionObserver: carrega imagem só quando entra na tela ──
+const _imgObserver = new IntersectionObserver((entries, obs) => {
+  entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    const img = entry.target;
+    if (img._lazySrc) {
+      img.src = img._lazySrc;
+      img.onload = () => { img.style.opacity = '1'; };
+      img.onerror = () => { img.style.opacity = '1'; };
+      delete img._lazySrc;
+    }
+    obs.unobserve(img);
+  });
+}, {
+  rootMargin: '200px 400px',  // carrega 200px antes de aparecer na tela
+  threshold: 0
+});
+
 const money = v => Number(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 
 function debounce(fn, delay = 300) {
@@ -1971,17 +1989,21 @@ function mostrarSkeletons() {
   try {
     const loadingSub = document.getElementById('loadingSubtext');
 
-    // ── CACHE: mostra dados anteriores instantaneamente ──
-    const cached = localStorage.getItem('mp_produtos_cache');
+    // ── CACHE LEVE: salva produtos sem imagens (muito mais rápido) ──
+    const cached = localStorage.getItem('mp_produtos_meta');
     if (cached) {
       try {
-        produtos = JSON.parse(cached);
+        const meta = JSON.parse(cached);
+        // Recompõe produtos com imagens do cache individual
+        produtos = meta.map(p => {
+          const imgCache = localStorage.getItem('mp_img_' + p.id);
+          return imgCache ? { ...p, imagem_base64: imgCache } : p;
+        });
         renderProdutosSimples(produtos);
-        // Esconde overlay logo de cara se tiver cache
         const overlay = loadingOverlay;
         overlay.style.opacity = '0';
-        setTimeout(() => { overlay.style.display = 'none'; overlay.style.opacity = '1'; }, 280);
-      } catch(e) { /* cache corrompido, ignora */ }
+        setTimeout(() => { overlay.style.display = 'none'; overlay.style.opacity = '1'; }, 250);
+      } catch(e) { localStorage.removeItem('mp_produtos_meta'); }
     }
 
     if (loadingSub) loadingSub.textContent = cached ? 'Atualizando...' : 'Buscando catálogo...';
@@ -1994,20 +2016,28 @@ function mostrarSkeletons() {
 
     produtos = await rProd.json();
 
-    // Salva cache para próxima visita
-    try { localStorage.setItem('mp_produtos_cache', JSON.stringify(produtos)); } catch(e){}
+    // Salva metadados sem imagem (leve) + cada imagem separada por ID
+    try {
+      const meta = produtos.map(p => { const {imagem_base64, imagens, ...rest} = p; return rest; });
+      localStorage.setItem('mp_produtos_meta', JSON.stringify(meta));
+      // Salva cada imagem separada — próxima visita carrega do cache por demanda
+      produtos.forEach(p => {
+        if (p.imagem_base64) {
+          try { localStorage.setItem('mp_img_' + p.id, p.imagem_base64); } catch(e){}
+        }
+      });
+    } catch(e){}
 
     if (rPromo) {
       try { promocoes = await rPromo.json(); } catch(e) { promocoes = []; }
     }
 
-    // Se não tinha cache, mostra preview rápido
     if (!cached) renderProdutosSimples(produtos);
 
     // Fecha overlay
     const overlay = loadingOverlay;
     overlay.style.opacity = '0';
-    setTimeout(() => { overlay.style.display = 'none'; overlay.style.opacity = '1'; }, 280);
+    setTimeout(() => { overlay.style.display = 'none'; overlay.style.opacity = '1'; }, 250);
 
     // Monta a vitrine completa
     requestAnimationFrame(() => {
@@ -2116,12 +2146,10 @@ function renderCategoriasComCarrossel(lista) {
     };
 
     produtosCat.forEach(p => {
-      let img = "/placeholder.png";
-      if (p.imagem_base64) {
-        img = p.imagem_base64.startsWith("data:image")
-          ? p.imagem_base64
-          : `data:image/jpeg;base64,${p.imagem_base64}`;
-      }
+      // Salva base64 na propriedade — NÃO insere no src ainda (evita travar o browser)
+      const imgData = p.imagem_base64
+        ? (p.imagem_base64.startsWith("data:image") ? p.imagem_base64 : `data:image/jpeg;base64,${p.imagem_base64}`)
+        : null;
 
       const promo = aplicarPromocao(p);
       const precoOrig = Number(p.preco || 0);
@@ -2137,7 +2165,9 @@ function renderCategoriasComCarrossel(lista) {
       card.className = 'product-card';
       card.innerHTML = `
         <div class="thumb">
-          <img loading="lazy" decoding="async" src="${img}" style="opacity:0;transition:opacity 0.3s ease;" onload="this.style.opacity='1'">
+          <img decoding="async"
+               src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEAAAAALAAAAAABAAEAAAI="
+               style="opacity:0;transition:opacity 0.35s ease;background:#ebebeb;width:100%;height:100%;object-fit:cover;">
         </div>
         <div class="title">${p.nome}</div>
         ${priceHtml}
@@ -2146,6 +2176,14 @@ function renderCategoriasComCarrossel(lista) {
           <button class="btn buy" onclick="addToCart(${p.id},1)">Comprar</button>
         </div>
       `;
+
+      // Só carrega a imagem quando o card aparecer na tela
+      if (imgData) {
+        const imgEl = card.querySelector('img');
+        imgEl._lazySrc = imgData;
+        _imgObserver.observe(imgEl);
+      }
+
       track.appendChild(card);
     });
 
