@@ -1161,9 +1161,7 @@ footer {
 #loadingOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(255,255,255,0.82);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background: #f5f5f5;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1173,7 +1171,7 @@ footer {
   color: #000;
   text-align: center;
   padding: 20px;
-  transition: opacity 0.4s ease;
+  transition: opacity 0.15s ease;
 }
 
 .loading-text {
@@ -1987,28 +1985,7 @@ function mostrarSkeletons() {
 
   async function fetchProdutos(){
   try {
-    const loadingSub = document.getElementById('loadingSubtext');
-
-    // ── CACHE LEVE: salva produtos sem imagens (muito mais rápido) ──
-    const cached = localStorage.getItem('mp_produtos_meta');
-    if (cached) {
-      try {
-        const meta = JSON.parse(cached);
-        // Recompõe produtos com imagens do cache individual
-        produtos = meta.map(p => {
-          const imgCache = localStorage.getItem('mp_img_' + p.id);
-          return imgCache ? { ...p, imagem_base64: imgCache } : p;
-        });
-        renderProdutosSimples(produtos);
-        const overlay = loadingOverlay;
-        overlay.style.opacity = '0';
-        setTimeout(() => { overlay.style.display = 'none'; overlay.style.opacity = '1'; }, 250);
-      } catch(e) { localStorage.removeItem('mp_produtos_meta'); }
-    }
-
-    if (loadingSub) loadingSub.textContent = cached ? 'Atualizando...' : 'Buscando catálogo...';
-
-    // ── Busca produtos e promoções AO MESMO TEMPO ──
+    // Busca produtos e promoções ao mesmo tempo
     const [rProd, rPromo] = await Promise.all([
       fetch(API_BASE + '/produtos'),
       fetch(API_BASE + '/promocoes').catch(() => null)
@@ -2016,42 +1993,24 @@ function mostrarSkeletons() {
 
     produtos = await rProd.json();
 
-    // Salva metadados sem imagem (leve) + cada imagem separada por ID
-    try {
-      const meta = produtos.map(p => { const {imagem_base64, imagens, ...rest} = p; return rest; });
-      localStorage.setItem('mp_produtos_meta', JSON.stringify(meta));
-      // Salva cada imagem separada — próxima visita carrega do cache por demanda
-      produtos.forEach(p => {
-        if (p.imagem_base64) {
-          try { localStorage.setItem('mp_img_' + p.id, p.imagem_base64); } catch(e){}
-        }
-      });
-    } catch(e){}
-
     if (rPromo) {
       try { promocoes = await rPromo.json(); } catch(e) { promocoes = []; }
     }
 
-    if (!cached) renderProdutosSimples(produtos);
+    // Monta categorias e filtros
+    renderMenuCategorias();
+    preencherFiltroCategorias();
+    if (!q.value.trim()) renderProdutos();
 
-    // Fecha overlay
-    const overlay = loadingOverlay;
-    overlay.style.opacity = '0';
-    setTimeout(() => { overlay.style.display = 'none'; overlay.style.opacity = '1'; }, 250);
-
-    // Monta a vitrine completa
-    requestAnimationFrame(() => {
-      renderMenuCategorias();
-      preencherFiltroCategorias();
-      if (!q.value.trim()) renderProdutos();
-    });
+    // Só some o overlay DEPOIS dos cards estarem no DOM
+    loadingOverlay.style.opacity = '0';
+    setTimeout(() => { loadingOverlay.style.display = 'none'; loadingOverlay.style.opacity = '1'; }, 200);
 
   } catch (e) {
     console.error('Erro produtos', e);
-    grid.innerHTML = '<div style="color:#f33;padding:20px;text-align:center">Erro ao carregar produtos. Recarregue a página.</div>';
-    const overlay = loadingOverlay;
-    overlay.style.opacity = '0';
-    setTimeout(() => { overlay.style.display = 'none'; overlay.style.opacity = '1'; }, 280);
+    grid.innerHTML = '<div style="color:#f33;padding:20px;text-align:center">Erro ao carregar. Recarregue a página.</div>';
+    loadingOverlay.style.opacity = '0';
+    setTimeout(() => { loadingOverlay.style.display = 'none'; loadingOverlay.style.opacity = '1'; }, 200);
   }
 }
 
