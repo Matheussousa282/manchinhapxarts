@@ -1807,20 +1807,30 @@ document.getElementById("btnEnviarEntrega").onclick = () => {
   /* Banner controls */
   async function carregarBanners(){
     try{
+      // Cache de banners
+      const cachedB = localStorage.getItem('mp_banners_cache');
+      if (cachedB) {
+        try {
+          banners = JSON.parse(cachedB);
+          renderBanners(banners);
+        } catch(e){}
+      }
+
       const res = await fetch(API_BASE + '/banner1');
       banners = await res.json();
+      try { localStorage.setItem('mp_banners_cache', JSON.stringify(banners)); } catch(e){}
+      renderBanners(banners);
+    }catch(err){ console.error('Erro ao carregar banners:', err); }
+  }
+
+  function renderBanners(bannerList) {
       const track = document.getElementById('bannerTrack');
-      if(!banners.length){ track.innerHTML = '<div style="color:#aaa;text-align:center;width:100%">Nenhum banner cadastrado</div>'; return; }
-      track.innerHTML = banners.map(b=>{
+      if(!bannerList.length){ track.innerHTML = '<div style="color:#aaa;text-align:center;width:100%">Nenhum banner cadastrado</div>'; return; }
+      track.innerHTML = bannerList.map(b=>{
         const img = b.imagem_base64 ? (b.imagem_base64.startsWith('data:image') ? b.imagem_base64 : `data:image/jpeg;base64,${b.imagem_base64}`) : '/placeholder.png';
-        return b.link ? `<a href="${b.link}" target="_blank"><img 
-  loading="lazy"
-  decoding="async"
-  src="${img}" 
-  alt="${b.titulo || ''}">` : `<img src="${img}" alt="${b.titulo||''}">`;
+        return b.link ? `<a href="${b.link}" target="_blank"><img loading="lazy" decoding="async" src="${img}" alt="${b.titulo || ''}"></a>` : `<img loading="lazy" decoding="async" src="${img}" alt="${b.titulo||''}">`;
       }).join('');
       startBannerCarousel();
-    }catch(err){ console.error('Erro ao carregar banners:', err); }
   }
   let currentBanner = 0;
   function startBannerCarousel(){
@@ -1960,36 +1970,58 @@ function mostrarSkeletons() {
   async function fetchProdutos(){
   try {
     const loadingSub = document.getElementById('loadingSubtext');
-    if (loadingSub) loadingSub.textContent = 'Buscando catálogo...';
 
-    const r = await fetch(API_BASE + '/produtos');
-    if (loadingSub) loadingSub.textContent = 'Montando vitrine...';
-    produtos = await r.json();
+    // ── CACHE: mostra dados anteriores instantaneamente ──
+    const cached = localStorage.getItem('mp_produtos_cache');
+    if (cached) {
+      try {
+        produtos = JSON.parse(cached);
+        renderProdutosSimples(produtos);
+        // Esconde overlay logo de cara se tiver cache
+        const overlay = loadingOverlay;
+        overlay.style.opacity = '0';
+        setTimeout(() => { overlay.style.display = 'none'; overlay.style.opacity = '1'; }, 280);
+      } catch(e) { /* cache corrompido, ignora */ }
+    }
 
-    // Mostrar primeiros 6 produtos imediatamente
-    renderProdutosSimples(produtos);
+    if (loadingSub) loadingSub.textContent = cached ? 'Atualizando...' : 'Buscando catálogo...';
 
-    // Fade out do overlay (não sumir bruscamente)
+    // ── Busca produtos e promoções AO MESMO TEMPO ──
+    const [rProd, rPromo] = await Promise.all([
+      fetch(API_BASE + '/produtos'),
+      fetch(API_BASE + '/promocoes').catch(() => null)
+    ]);
+
+    produtos = await rProd.json();
+
+    // Salva cache para próxima visita
+    try { localStorage.setItem('mp_produtos_cache', JSON.stringify(produtos)); } catch(e){}
+
+    if (rPromo) {
+      try { promocoes = await rPromo.json(); } catch(e) { promocoes = []; }
+    }
+
+    // Se não tinha cache, mostra preview rápido
+    if (!cached) renderProdutosSimples(produtos);
+
+    // Fecha overlay
     const overlay = loadingOverlay;
     overlay.style.opacity = '0';
-    setTimeout(() => { overlay.style.display = 'none'; overlay.style.opacity = '1'; }, 380);
+    setTimeout(() => { overlay.style.display = 'none'; overlay.style.opacity = '1'; }, 280);
 
-    // Carregar o resto depois (sem bloquear renderização)
-    setTimeout(() => {
+    // Monta a vitrine completa
+    requestAnimationFrame(() => {
       renderMenuCategorias();
       preencherFiltroCategorias();
-
-      fetchPromocoes().then(() => {
-        if (!q.value.trim()) renderProdutos();
-      });
-    }, 30);
+      if (!q.value.trim()) renderProdutos();
+    });
 
   } catch (e) {
     console.error('Erro produtos', e);
-    grid.innerHTML = '<div style="color:#f33">Erro ao carregar produtos</div>';
+    grid.innerHTML = '<div style="color:#f33;padding:20px;text-align:center">Erro ao carregar produtos. Recarregue a página.</div>';
     const overlay = loadingOverlay;
     overlay.style.opacity = '0';
-    setTimeout(() => { overlay.style.display = 'none'; overlay.style.opacity = '1'; }, 380);
+    setTimeout(() => { overlay.style.display = 'none'; overlay.style.opacity = '1'; }, 280);
   }
 }
 
@@ -3056,15 +3088,10 @@ window.selecionarCategoriaMenu = (cat) => {
 
   mostrarSkeletons();
 
-setTimeout(() => {
-    fetchProdutos();
-}, 3);
-
-  setTimeout(() => {
+  // Dispara tudo em paralelo — produtos + banners + promoções ao mesmo tempo
+  fetchProdutos();
   carregarBanners();
-}, 800);
   updateCartUI();
-});
 </script>
 </body>
 
