@@ -921,34 +921,53 @@ footer {
 }
 
 
-/* SKELETON LOADER */
+/* SKELETON LOADER — shimmer transparente */
 .skeleton-card {
-  background: #e3e3e3;
+  background: rgba(255,255,255,0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(0,0,0,0.07);
   border-radius: 12px;
   padding: 12px;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  animation: pulseSkeleton 1.4s infinite ease-in-out;
+  overflow: hidden;
+  position: relative;
 }
 
 .skeleton-thumb {
   width: 100%;
   height: 160px;
-  background: #d2d2d2;
+  background: linear-gradient(90deg, rgba(220,220,220,0.6) 25%, rgba(240,240,240,0.9) 50%, rgba(220,220,220,0.6) 75%);
+  background-size: 200% 100%;
   border-radius: 8px;
+  animation: shimmer 1.4s infinite linear;
 }
 
 .skeleton-line {
-  height: 14px;
-  background: #d2d2d2;
+  height: 13px;
+  background: linear-gradient(90deg, rgba(220,220,220,0.6) 25%, rgba(240,240,240,0.9) 50%, rgba(220,220,220,0.6) 75%);
+  background-size: 200% 100%;
   border-radius: 6px;
+  animation: shimmer 1.4s infinite linear;
 }
 
-@keyframes pulseSkeleton {
-  0% { opacity: 0.7; }
-  50% { opacity: 1; }
-  100% { opacity: 0.7; }
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Fade-in ao aparecer o card real */
+@keyframes cardFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.product-card {
+  animation: cardFadeIn 0.3s ease both;
+}
+.categoria-section {
+  animation: cardFadeIn 0.35s ease both;
 }
 
 /* FIX ABSOLUTO PARA iPHONE */
@@ -1025,7 +1044,9 @@ footer {
 #loadingOverlay {
   position: fixed;
   inset: 0;
-  background: #ffffff;
+  background: rgba(255,255,255,0.82);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1035,6 +1056,7 @@ footer {
   color: #000;
   text-align: center;
   padding: 20px;
+  transition: opacity 0.4s ease;
 }
 
 .loading-text {
@@ -1047,6 +1069,10 @@ footer {
   0% { opacity: 0.6; transform: scale(1); }
   50% { opacity: 1; transform: scale(1.05); }
   100% { opacity: 0.6; transform: scale(1); }
+}
+
+@keyframes spinLoader {
+  to { transform: rotate(360deg); }
 }
 
 /* ===== CORREÇÃO DAS SETINHAS ===== */
@@ -1076,7 +1102,11 @@ footer {
 </head>
 <body>
   <div id="loadingOverlay">
-  <div class="loading-text">Carregando produtos, aguarde...</div>
+  <div style="display:flex;flex-direction:column;align-items:center;gap:14px;">
+    <div style="width:44px;height:44px;border:4px solid #ddd;border-top-color:#000;border-radius:50%;animation:spinLoader 0.7s linear infinite;"></div>
+    <div class="loading-text">Carregando produtos...</div>
+    <div id="loadingSubtext" style="font-size:13px;color:#666;margin-top:-6px;"></div>
+  </div>
 </div>
 
 <header class="topo">
@@ -1731,22 +1761,34 @@ document.getElementById("btnEnviarEntrega").onclick = () => {
 function mostrarSkeletons() {
   const grid = document.getElementById("productsGrid");
 
-  grid.innerHTML = `
-    <div style="width:100%;text-align:center;font-size:18px;margin-bottom:12px;color:#555;">
-      🔄 Organizando os Produtos na Vitrine…
+  // Cria uma seção skeleton parecida com a estrutura real de categorias
+  let html = `
+    <div style="width:100%;text-align:center;font-size:15px;margin-bottom:16px;color:#888;letter-spacing:.3px;">
+      Preparando sua vitrine…
     </div>
   `;
 
-  for (let i = 0; i < 8; i++) {
-    grid.innerHTML += `
-      <div class="skeleton-card">
-        <div class="skeleton-thumb"></div>
-        <div class="skeleton-line" style="width: 80%"></div>
-        <div class="skeleton-line" style="width: 60%"></div>
-        <div class="skeleton-line" style="width: 40%"></div>
-      </div>
+  // Simula 2 categorias com skeletons
+  for (let s = 0; s < 2; s++) {
+    html += `
+      <div style="margin:24px 0 8px;">
+        <div class="skeleton-line" style="width:160px;height:20px;margin-bottom:14px;"></div>
+        <div style="display:flex;gap:16px;overflow:hidden;">
     `;
+    for (let i = 0; i < 5; i++) {
+      html += `
+        <div class="skeleton-card" style="min-width:180px;max-width:180px;flex-shrink:0;">
+          <div class="skeleton-thumb"></div>
+          <div class="skeleton-line" style="width:80%"></div>
+          <div class="skeleton-line" style="width:55%"></div>
+          <div class="skeleton-line" style="width:38%;height:10px;"></div>
+        </div>
+      `;
+    }
+    html += `</div></div>`;
   }
+
+  grid.innerHTML = html;
 }
 
 
@@ -1800,26 +1842,37 @@ function mostrarSkeletons() {
 
   async function fetchProdutos(){
   try {
+    const loadingSub = document.getElementById('loadingSubtext');
+    if (loadingSub) loadingSub.textContent = 'Buscando catálogo...';
+
     const r = await fetch(API_BASE + '/produtos');
+    if (loadingSub) loadingSub.textContent = 'Montando vitrine...';
     produtos = await r.json();
 
-renderProdutosSimples(produtos);
+    // Mostrar primeiros 6 produtos imediatamente
+    renderProdutosSimples(produtos);
 
-loadingOverlay.style.display = "none";
+    // Fade out do overlay (não sumir bruscamente)
+    const overlay = loadingOverlay;
+    overlay.style.opacity = '0';
+    setTimeout(() => { overlay.style.display = 'none'; overlay.style.opacity = '1'; }, 380);
 
-setTimeout(() => {
-  renderMenuCategorias();
-  preencherFiltroCategorias();
+    // Carregar o resto depois (sem bloquear renderização)
+    setTimeout(() => {
+      renderMenuCategorias();
+      preencherFiltroCategorias();
 
-  fetchPromocoes().then(() => {
-    if (!q.value.trim()) renderProdutos();
-  });
-}, 50);
+      fetchPromocoes().then(() => {
+        if (!q.value.trim()) renderProdutos();
+      });
+    }, 30);
 
   } catch (e) {
     console.error('Erro produtos', e);
     grid.innerHTML = '<div style="color:#f33">Erro ao carregar produtos</div>';
-    loadingOverlay.style.display = "none";
+    const overlay = loadingOverlay;
+    overlay.style.opacity = '0';
+    setTimeout(() => { overlay.style.display = 'none'; overlay.style.opacity = '1'; }, 380);
   }
 }
 
@@ -1935,7 +1988,7 @@ function renderCategoriasComCarrossel(lista) {
       card.className = 'product-card';
       card.innerHTML = `
         <div class="thumb">
-          <img loading="lazy" decoding="async" src="${img}">
+          <img loading="lazy" decoding="async" src="${img}" style="opacity:0;transition:opacity 0.3s ease;" onload="this.style.opacity='1'">
         </div>
         <div class="title">${p.nome}</div>
         ${priceHtml}
