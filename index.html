@@ -53,12 +53,12 @@ header{
 .thumb {
   height: 160px;
   border-radius: 8px;
-  background: #0a0a0a;
+  background: #e8e8e8;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;      /* impede imagem de vazar */
-  flex-shrink: 0;        /* impede compressão vertical */
+  overflow: hidden;
+  flex-shrink: 0;
   width: 100%;
 }
 
@@ -330,8 +330,9 @@ footer{padding:28px 18px;color:var(--muted);text-align:center}
 .product-card {
   min-width: 220px;
   flex-shrink: 0;
-  overflow: hidden;      /* impede qualquer conteúdo de vazar */
-  min-width: 0;          /* necessário em flex/grid para não esticar */
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
 /* product arrow buttons */
@@ -542,7 +543,9 @@ footer{padding:28px 18px;color:var(--muted);text-align:center}
   max-width: 190px;
   width: 190px;
   flex-shrink: 0;
-  overflow: hidden;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: visible !important;
   border-radius: 16px !important;
   border: 1px solid rgba(0,0,0,0.08) !important;
   box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05) !important;
@@ -558,8 +561,11 @@ footer{padding:28px 18px;color:var(--muted);text-align:center}
 
 .categoria-track .product-card .thumb {
   height: 150px !important;
+  min-height: 150px !important;
   border-radius: 16px 16px 0 0 !important;
   overflow: hidden;
+  flex-shrink: 0;
+  background: #e8e8e8;
 }
 
 .categoria-track .product-card .thumb img {
