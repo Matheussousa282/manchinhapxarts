@@ -1196,10 +1196,7 @@ footer {
 </style>
 </head>
 <body>
-  <div class="loading-text">Carregando produtos...</div>
-    <div id="loadingSubtext" style="font-size:13px;color:#666;margin-top:-6px;"></div>
-  </div>
-</div>
+
 
 <header class="topo">
   <button id="btnMenu" style="
@@ -1966,24 +1963,24 @@ function mostrarSkeletons() {
       fetch(API_BASE + '/promocoes').catch(() => null)
     ]);
 
-    produtos = await rProd.json();
+    // Lê os dois JSONs em paralelo também
+    const [listaProd, listaPromo] = await Promise.all([
+      rProd.json(),
+      rPromo ? rPromo.json().catch(() => []) : Promise.resolve([])
+    ]);
 
-    if (rPromo) {
-      try { promocoes = await rPromo.json(); } catch(e) { promocoes = []; }
-    }
+    produtos  = listaProd;
+    promocoes = listaPromo;
 
-    // Monta categorias e filtros
+    // Monta tudo de uma vez — sem setTimeout, sem requestAnimationFrame extra
     renderMenuCategorias();
     preencherFiltroCategorias();
     if (!q.value.trim()) renderProdutos();
 
-    // Só some o overlay DEPOIS dos cards estarem no DOM
-    setTimeout(() => { }, 200);
-
   } catch (e) {
     console.error('Erro produtos', e);
-    grid.innerHTML = '<div style="color:#f33;padding:20px;text-align:center">Erro ao carregar. Recarregue a página.</div>';
-    setTimeout(() => { }, 200);
+    document.getElementById('productsGrid').innerHTML =
+      '<div style="color:#f33;padding:20px;text-align:center">Erro ao carregar. Recarregue a página.</div>';
   }
 }
 
