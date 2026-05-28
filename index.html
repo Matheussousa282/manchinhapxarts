@@ -1721,14 +1721,20 @@ const _imgObserver = new IntersectionObserver((entries, obs) => {
     const img = entry.target;
     if (img._lazySrc) {
       img.src = img._lazySrc;
-      img.onload = () => { img.style.opacity = '1'; };
-      img.onerror = () => { img.style.opacity = '1'; };
+      img.onload = () => {
+        img.style.opacity = '1';
+        if (img._shimmer) img._shimmer.style.display = 'none';
+      };
+      img.onerror = () => {
+        img.style.opacity = '0';
+        if (img._shimmer) img._shimmer.style.background = '#ddd';
+      };
       delete img._lazySrc;
     }
     obs.unobserve(img);
   });
 }, {
-  rootMargin: '200px 400px',  // carrega 200px antes de aparecer na tela
+  rootMargin: '100px 300px',
   threshold: 0
 });
 
@@ -2075,7 +2081,6 @@ function renderCategoriasComCarrossel(lista) {
     };
 
     produtosCat.forEach(p => {
-      // Salva base64 na propriedade — NÃO insere no src ainda (evita travar o browser)
       const imgData = p.imagem_base64
         ? (p.imagem_base64.startsWith("data:image") ? p.imagem_base64 : `data:image/jpeg;base64,${p.imagem_base64}`)
         : null;
@@ -2092,12 +2097,24 @@ function renderCategoriasComCarrossel(lista) {
 
       const card = document.createElement('article');
       card.className = 'product-card';
+
+      // Thumb: shimmer enquanto imagem não chega, fade-in quando carrega
+      const thumbInner = `
+        <div class="thumb-img-wrap" style="position:relative;width:100%;height:100%;">
+          <div class="thumb-shimmer" style="
+            position:absolute;inset:0;
+            background:linear-gradient(90deg,#e0e0e0 25%,#ececec 50%,#e0e0e0 75%);
+            background-size:200% 100%;
+            animation:shimmer 1.2s infinite linear;
+            border-radius:16px 16px 0 0;
+          "></div>
+          ${imgData ? `<img decoding="async"
+            src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEAAAAALAAAAAABAAEAAAI="
+            style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 0.4s ease;border-radius:16px 16px 0 0;">` : ''}
+        </div>`;
+
       card.innerHTML = `
-        <div class="thumb">
-          <img decoding="async"
-               src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEAAAAALAAAAAABAAEAAAI="
-               style="opacity:0;transition:opacity 0.35s ease;background:#ebebeb;width:100%;height:100%;object-fit:cover;">
-        </div>
+        <div class="thumb" style="position:relative;">${thumbInner}</div>
         <div class="title">${p.nome}</div>
         ${priceHtml}
         <div class="actions">
@@ -2106,10 +2123,11 @@ function renderCategoriasComCarrossel(lista) {
         </div>
       `;
 
-      // Só carrega a imagem quando o card aparecer na tela
+      // Lazy: coloca o src real só quando entra na viewport
       if (imgData) {
         const imgEl = card.querySelector('img');
         imgEl._lazySrc = imgData;
+        imgEl._shimmer = card.querySelector('.thumb-shimmer');
         _imgObserver.observe(imgEl);
       }
 
@@ -2117,11 +2135,10 @@ function renderCategoriasComCarrossel(lista) {
     });
 
     container.appendChild(bloco);
-
-    requestAnimationFrame(renderProxima);
   }
 
-  renderProxima();
+  // Renderiza todas as categorias de uma vez — sem esperar frame por frame
+  while (index < categorias.length) renderProxima();
 }
 
 
