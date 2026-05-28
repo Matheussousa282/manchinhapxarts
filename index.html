@@ -53,12 +53,12 @@ header{
 .thumb {
   height: 160px;
   border-radius: 8px;
-  background: #e8e8e8;
+  background: #0a0a0a;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
-  flex-shrink: 0;
+  overflow: hidden;      /* impede imagem de vazar */
+  flex-shrink: 0;        /* impede compressão vertical */
   width: 100%;
 }
 
@@ -328,11 +328,10 @@ footer{padding:28px 18px;color:var(--muted);text-align:center}
    CORREÇÃO: product-card sempre com tamanho fixo
    ============================================= */
 .product-card {
-  min-width: 220px;
   flex-shrink: 0;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  min-width: 0;
 }
 
 /* product arrow buttons */
@@ -543,9 +542,9 @@ footer{padding:28px 18px;color:var(--muted);text-align:center}
   max-width: 190px;
   width: 190px;
   flex-shrink: 0;
-  display: flex !important;
-  flex-direction: column !important;
-  overflow: visible !important;
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
   border-radius: 16px !important;
   border: 1px solid rgba(0,0,0,0.08) !important;
   box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05) !important;
@@ -561,11 +560,8 @@ footer{padding:28px 18px;color:var(--muted);text-align:center}
 
 .categoria-track .product-card .thumb {
   height: 150px !important;
-  min-height: 150px !important;
   border-radius: 16px 16px 0 0 !important;
   overflow: hidden;
-  flex-shrink: 0;
-  background: #e8e8e8;
 }
 
 .categoria-track .product-card .thumb img {
@@ -748,16 +744,18 @@ header {
 
 /* =============================================
    CORREÇÃO PRINCIPAL: card no tema claro
+   com overflow hidden para não vazar imagem
    ============================================= */
 .product-card {
     background: #ffffff !important;
-    border: 1px solid #e6e6e6 !important;
+    border: 1px solid rgba(0,0,0,0.08) !important;
     border-radius: 16px !important;
     color: #000 !important;
     overflow: visible !important;
     min-width: 0 !important;
     display: flex !important;
     flex-direction: column !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.07);
 }
 
 .product-card .title {
@@ -1109,7 +1107,9 @@ footer {
     .product-card .thumb,
     .categoria-track .thumb {
         height: 120px !important;
-        overflow: hidden !important;
+        overflow: visible !important;
+        display: flex !important;
+        flex-direction: column !important;
     }
 
     .product-card .title {
@@ -1205,7 +1205,8 @@ footer {
 </style>
 </head>
 <body>
-
+  </div>
+</div>
 
 <header class="topo">
   <button id="btnMenu" style="
@@ -1723,29 +1724,50 @@ let promocoes = [];
 let categorias = [];
 let cart = JSON.parse(localStorage.getItem('mp_cart') || '[]');
 
-// ── IntersectionObserver: carrega imagem só quando entra na tela ──
-const _imgObserver = new IntersectionObserver((entries, obs) => {
+// Lazy image loader — mostra texto/preço/botões IMEDIATAMENTE,
+// carrega a imagem só quando o card entra na tela
+const _lazyObserver = new IntersectionObserver((entries, obs) => {
   entries.forEach(entry => {
     if (!entry.isIntersecting) return;
-    const img = entry.target;
-    if (img._lazySrc) {
-      img.src = img._lazySrc;
-      img.onload = () => {
-        img.style.opacity = '1';
-        if (img._shimmer) img._shimmer.style.display = 'none';
-      };
-      img.onerror = () => {
-        img.style.opacity = '0';
-        if (img._shimmer) img._shimmer.style.background = '#ddd';
-      };
-      delete img._lazySrc;
-    }
-    obs.unobserve(img);
+    const thumb = entry.target;
+    const src = thumb._lazySrc;
+    if (!src) return;
+    const img = document.createElement('img');
+    img.decoding = 'async';
+    img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 0.4s ease;';
+    img.onload = () => {
+      img.style.opacity = '1';
+      const sh = thumb.querySelector('.img-shimmer');
+      if (sh) sh.style.display = 'none';
+    };
+    img.src = src;
+    thumb.appendChild(img);
+    delete thumb._lazySrc;
+    obs.unobserve(thumb);
   });
-}, {
-  rootMargin: '100px 300px',
-  threshold: 0
-});
+}, { rootMargin: '100px 400px', threshold: 0 });
+
+// Lazy image loader — carrega imagem só quando entra na tela
+const _lazyObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    const el = entry.target;
+    const data = el._imgData;
+    if (!data) return;
+    const img = new Image();
+    img.decoding = 'async';
+    img.onload = () => {
+      img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 0.35s ease;';
+      el.appendChild(img);
+      requestAnimationFrame(() => { img.style.opacity = '1'; });
+      const sh = el.querySelector('.img-shimmer');
+      if (sh) setTimeout(() => sh.remove(), 400);
+    };
+    img.src = data;
+    delete el._imgData;
+    _lazyObserver.unobserve(el);
+  });
+}, { rootMargin: '150px 400px', threshold: 0 });
 
 const money = v => Number(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 
@@ -1759,6 +1781,7 @@ function debounce(fn, delay = 300) {
 
 
 document.addEventListener('DOMContentLoaded', () => {
+  const loadingOverlay = document.getElementById("loadingOverlay");
   const grid = document.getElementById('productsGrid');
   const prodCount = document.getElementById('prodCount');
   const q = document.getElementById('q');
@@ -1891,27 +1914,28 @@ document.getElementById("btnEnviarEntrega").onclick = () => {
 
 function mostrarSkeletons() {
   const grid = document.getElementById("productsGrid");
-  let html = '';
 
-  // 4 seções de categoria skeleton — igual à estrutura real
-  for (let s = 0; s < 4; s++) {
+  // Cria uma seção skeleton parecida com a estrutura real de categorias
+  let html = `
+    <div style="width:100%;text-align:center;font-size:15px;margin-bottom:16px;color:#888;letter-spacing:.3px;">
+      Preparando sua vitrine…
+    </div>
+  `;
+
+  // Simula 2 categorias com skeletons
+  for (let s = 0; s < 2; s++) {
     html += `
-      <div class="categoria-section" style="animation:none;">
-        <div class="skeleton-line" style="width:140px;height:17px;margin-bottom:18px;margin-left:0;margin-right:0;border-radius:6px;"></div>
-        <div style="display:flex;gap:14px;overflow:hidden;padding:4px 2px;">
+      <div style="margin:24px 0 8px;">
+        <div class="skeleton-line" style="width:160px;height:20px;margin-bottom:14px;"></div>
+        <div style="display:flex;gap:16px;overflow:hidden;">
     `;
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 5; i++) {
       html += `
-        <div class="skeleton-card" style="min-width:190px;max-width:190px;flex-shrink:0;">
+        <div class="skeleton-card" style="min-width:180px;max-width:180px;flex-shrink:0;">
           <div class="skeleton-thumb"></div>
-          <div style="padding:10px 12px 12px;display:flex;flex-direction:column;gap:8px;">
-            <div class="skeleton-line" style="width:85%;margin:0;"></div>
-            <div class="skeleton-line" style="width:50%;margin:0;"></div>
-            <div style="display:flex;gap:7px;margin-top:4px;">
-              <div class="skeleton-line" style="flex:1;height:30px;margin:0;border-radius:10px;"></div>
-              <div class="skeleton-line" style="flex:1;height:30px;margin:0;border-radius:10px;"></div>
-            </div>
-          </div>
+          <div class="skeleton-line" style="width:80%"></div>
+          <div class="skeleton-line" style="width:55%"></div>
+          <div class="skeleton-line" style="width:38%;height:10px;"></div>
         </div>
       `;
     }
@@ -1922,7 +1946,36 @@ function mostrarSkeletons() {
 }
 
 
+  function renderProdutosSimples(lista) {
+  const grid = document.getElementById("productsGrid");
 
+  grid.innerHTML = lista.slice(0, 12).map(p => {
+    let img = "/placeholder.png";
+
+    if (p.imagem_base64) {
+      img = p.imagem_base64.startsWith("data:image")
+        ? p.imagem_base64
+        : `data:image/jpeg;base64,${p.imagem_base64}`;
+    }
+
+    return `
+      <article class="product-card">
+        <div class="thumb">
+          <img 
+            loading="lazy"
+            decoding="async"
+            src="${img}"
+            width="220"
+            height="160"
+          >
+        </div>
+
+        <div class="title">${p.nome}</div>
+        <div class="price">${money(p.preco)}</div>
+      </article>
+    `;
+  }).join("");
+}
 
   function preencherFiltroCategorias() {
   const select = document.getElementById("filterCategoria");
@@ -1943,29 +1996,20 @@ function mostrarSkeletons() {
 
   async function fetchProdutos(){
   try {
-    // Dispara os dois requests ao mesmo tempo
     const [rProd, rPromo] = await Promise.all([
       fetch(API_BASE + '/produtos'),
       fetch(API_BASE + '/promocoes').catch(() => null)
     ]);
-
-    // Lê produto JSON (pode ser grande — não bloqueia a promoção)
-    // Usa text() + JSON.parse assíncrono para não congelar a UI
     const [texProd, texPromo] = await Promise.all([
       rProd.text(),
       rPromo ? rPromo.text().catch(() => '[]') : Promise.resolve('[]')
     ]);
-
-    // Parse fora da thread principal usando scheduler (ou fallback com setTimeout)
     await new Promise(r => setTimeout(r, 0));
     produtos  = JSON.parse(texProd);
     promocoes = JSON.parse(texPromo || '[]');
-
-    // Render imediato — skeleton some, cards aparecem com texto/preço/botões
     renderMenuCategorias();
     preencherFiltroCategorias();
     if (!q.value.trim()) renderProdutos();
-
   } catch (e) {
     console.error('Erro produtos', e);
     document.getElementById('productsGrid').innerHTML =
@@ -2080,19 +2124,10 @@ function renderCategoriasComCarrossel(lista) {
 
       const card = document.createElement('article');
       card.className = 'product-card';
-
-      // Thumb: shimmer enquanto imagem não chega, fade-in quando carrega
+      // Thumb fica cinza com shimmer; texto/preço/botões ficam SEMPRE visíveis
       card.innerHTML = `
-        <div class="thumb" style="position:relative;overflow:hidden;">
-          <div class="thumb-shimmer" style="
-            position:absolute;inset:0;
-            background:linear-gradient(90deg,#d8d8d8 25%,#ececec 50%,#d8d8d8 75%);
-            background-size:200% 100%;
-            animation:shimmer 1.2s infinite linear;
-          "></div>
-          ${imgData ? `<img decoding="async"
-            src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEAAAAALAAAAAABAAEAAAI="
-            style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 0.4s ease;">` : ''}
+        <div class="thumb" style="position:relative;background:#e8e8e8;overflow:hidden;">
+          <div style="position:absolute;inset:0;background:linear-gradient(90deg,#e0e0e0 25%,#f0f0f0 50%,#e0e0e0 75%);background-size:200% 100%;animation:shimmer 1.2s infinite linear;" class="img-shimmer"></div>
         </div>
         <div class="title">${p.nome}</div>
         ${priceHtml}
@@ -2102,21 +2137,18 @@ function renderCategoriasComCarrossel(lista) {
         </div>
       `;
 
-      // Lazy: coloca o src real só quando entra na viewport
+      // Imagem: só injeta quando o thumb entrar na tela
       if (imgData) {
-        const imgEl = card.querySelector('img');
-        imgEl._lazySrc = imgData;
-        imgEl._shimmer = card.querySelector('.thumb-shimmer');
-        _imgObserver.observe(imgEl);
+        const thumb = card.querySelector('.thumb');
+        thumb._lazySrc = imgData;
+        _lazyObserver.observe(thumb);
       }
-
       track.appendChild(card);
     });
 
     container.appendChild(bloco);
   }
 
-  // Renderiza todas as categorias de uma vez — sem esperar frame por frame
   while (index < categorias.length) renderProxima();
 }
 
