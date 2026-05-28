@@ -748,15 +748,16 @@ header {
 
 /* =============================================
    CORREÇÃO PRINCIPAL: card no tema claro
-   com overflow hidden para não vazar imagem
    ============================================= */
 .product-card {
     background: #ffffff !important;
     border: 1px solid #e6e6e6 !important;
-    border-radius: 12px !important;
+    border-radius: 16px !important;
     color: #000 !important;
-    overflow: hidden !important;
+    overflow: visible !important;
     min-width: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
 }
 
 .product-card .title {
@@ -1100,7 +1101,9 @@ footer {
     .categoria-track .product-card {
         min-width: 155px !important;
         max-width: 155px !important;
-        overflow: hidden !important;
+        overflow: visible !important;
+        display: flex !important;
+        flex-direction: column !important;
     }
 
     .product-card .thumb,
