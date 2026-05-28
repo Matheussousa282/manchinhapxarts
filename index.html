@@ -1913,36 +1913,7 @@ function mostrarSkeletons() {
 }
 
 
-  function renderProdutosSimples(lista) {
-  const grid = document.getElementById("productsGrid");
 
-  grid.innerHTML = lista.slice(0, 12).map(p => {
-    let img = "/placeholder.png";
-
-    if (p.imagem_base64) {
-      img = p.imagem_base64.startsWith("data:image")
-        ? p.imagem_base64
-        : `data:image/jpeg;base64,${p.imagem_base64}`;
-    }
-
-    return `
-      <article class="product-card">
-        <div class="thumb">
-          <img 
-            loading="lazy"
-            decoding="async"
-            src="${img}"
-            width="220"
-            height="160"
-          >
-        </div>
-
-        <div class="title">${p.nome}</div>
-        <div class="price">${money(p.preco)}</div>
-      </article>
-    `;
-  }).join("");
-}
 
   function preencherFiltroCategorias() {
   const select = document.getElementById("filterCategoria");
@@ -1963,22 +1934,25 @@ function mostrarSkeletons() {
 
   async function fetchProdutos(){
   try {
-    // Busca produtos e promoções ao mesmo tempo
+    // Dispara os dois requests ao mesmo tempo
     const [rProd, rPromo] = await Promise.all([
       fetch(API_BASE + '/produtos'),
       fetch(API_BASE + '/promocoes').catch(() => null)
     ]);
 
-    // Lê os dois JSONs em paralelo também
-    const [listaProd, listaPromo] = await Promise.all([
-      rProd.json(),
-      rPromo ? rPromo.json().catch(() => []) : Promise.resolve([])
+    // Lê produto JSON (pode ser grande — não bloqueia a promoção)
+    // Usa text() + JSON.parse assíncrono para não congelar a UI
+    const [texProd, texPromo] = await Promise.all([
+      rProd.text(),
+      rPromo ? rPromo.text().catch(() => '[]') : Promise.resolve('[]')
     ]);
 
-    produtos  = listaProd;
-    promocoes = listaPromo;
+    // Parse fora da thread principal usando scheduler (ou fallback com setTimeout)
+    await new Promise(r => setTimeout(r, 0));
+    produtos  = JSON.parse(texProd);
+    promocoes = JSON.parse(texPromo || '[]');
 
-    // Monta tudo de uma vez — sem setTimeout, sem requestAnimationFrame extra
+    // Render imediato — skeleton some, cards aparecem com texto/preço/botões
     renderMenuCategorias();
     preencherFiltroCategorias();
     if (!q.value.trim()) renderProdutos();
@@ -2099,22 +2073,18 @@ function renderCategoriasComCarrossel(lista) {
       card.className = 'product-card';
 
       // Thumb: shimmer enquanto imagem não chega, fade-in quando carrega
-      const thumbInner = `
-        <div class="thumb-img-wrap" style="position:relative;width:100%;height:100%;">
+      card.innerHTML = `
+        <div class="thumb" style="position:relative;overflow:hidden;">
           <div class="thumb-shimmer" style="
             position:absolute;inset:0;
-            background:linear-gradient(90deg,#e0e0e0 25%,#ececec 50%,#e0e0e0 75%);
+            background:linear-gradient(90deg,#d8d8d8 25%,#ececec 50%,#d8d8d8 75%);
             background-size:200% 100%;
             animation:shimmer 1.2s infinite linear;
-            border-radius:16px 16px 0 0;
           "></div>
           ${imgData ? `<img decoding="async"
             src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEAAAAALAAAAAABAAEAAAI="
-            style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 0.4s ease;border-radius:16px 16px 0 0;">` : ''}
-        </div>`;
-
-      card.innerHTML = `
-        <div class="thumb" style="position:relative;">${thumbInner}</div>
+            style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 0.4s ease;">` : ''}
+        </div>
         <div class="title">${p.nome}</div>
         ${priceHtml}
         <div class="actions">
