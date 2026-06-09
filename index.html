@@ -2051,11 +2051,32 @@ function renderCatPills(categorias) {
     const isAtivo = filterCategoria.value === cat;
     pill.className = "cat-pill" + (isAtivo ? " active" : "");
     pill.dataset.cat = cat;
-    pill.innerHTML = `<span class="pill-label">${cat}</span><span class="pill-copy" title="Copiar link desta categoria" onclick="copiarLinkCategoria(event,'${escapeHtml(cat)}')">🔗</span>`;
-    pill.onclick = (e) => {
+    pill.innerHTML = `<span class="pill-label"></span><span class="pill-copy" title="Copiar link desta categoria">🔗</span>`;
+    pill.querySelector('.pill-label').textContent = cat;
+
+    // Botão copiar — usa addEventListener para evitar problemas de escape
+    const copyBtn = pill.querySelector('.pill-copy');
+    copyBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      const url = new URL(window.location.href);
+      url.searchParams.set("categoria", cat);
+      const linkParaCopiar = url.toString();
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(linkParaCopiar).then(() => {
+          mostrarToast("🔗 Link copiado!");
+        }).catch(() => copiarFallback(linkParaCopiar));
+      } else {
+        copiarFallback(linkParaCopiar);
+      }
+    });
+
+    // Clique no pill (filtrar)
+    pill.addEventListener('click', (e) => {
       if (e.target.closest('.pill-copy')) return;
       selecionarCategoriaPill(cat, pill);
-    };
+    });
+
     bar.appendChild(pill);
   });
 }
@@ -2082,6 +2103,23 @@ function selecionarCategoriaPill(cat, pillEl) {
   pillEl.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
 }
 
+function copiarFallback(texto) {
+  const el = document.createElement("textarea");
+  el.value = texto;
+  el.style.position = "fixed";
+  el.style.opacity = "0";
+  document.body.appendChild(el);
+  el.focus();
+  el.select();
+  try {
+    document.execCommand("copy");
+    mostrarToast("🔗 Link copiado!");
+  } catch(e) {
+    mostrarToast("❌ Não foi possível copiar");
+  }
+  document.body.removeChild(el);
+}
+
 function copiarLinkCategoria(e, cat) {
   e.stopPropagation();
   const url = new URL(window.location.href);
@@ -2089,14 +2127,7 @@ function copiarLinkCategoria(e, cat) {
   navigator.clipboard.writeText(url.toString()).then(() => {
     mostrarToast("🔗 Link copiado!");
   }).catch(() => {
-    // fallback para navegadores sem clipboard
-    const el = document.createElement("textarea");
-    el.value = url.toString();
-    document.body.appendChild(el);
-    el.select();
-    document.execCommand("copy");
-    document.body.removeChild(el);
-    mostrarToast("🔗 Link copiado!");
+    copiarFallback(url.toString());
   });
 }
 
