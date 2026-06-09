@@ -1179,182 +1179,207 @@ footer {
 
 }
 
-/* ===== BARRA DE BOTÕES DE CATEGORIA ===== */
-.cat-pills-bar {
+/* ===== CORREÇÃO DAS SETINHAS ===== */
+.banner-carousel,
+.categoria-wrap {
+  overflow: visible !important;
+}
+
+/* ===== BARRA DE NAVEGAÇÃO POR CATEGORIA ===== */
+.cat-nav-wrapper {
+  position: relative;
+  margin: 16px 0 4px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 14px 10px 14px 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  border: 1px solid rgba(0,0,0,0.06);
+}
+
+.cat-nav-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: #888;
+  margin-bottom: 10px;
+}
+
+.cat-nav-scroll-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cat-nav-track {
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  padding: 8px 2px 10px;
+  scroll-behavior: smooth;
+  padding: 4px 2px;
   flex-wrap: nowrap;
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  margin-bottom: 4px;
+  cursor: grab;
+  user-select: none;
 }
-.cat-pills-bar::-webkit-scrollbar { display: none; }
+.cat-nav-track::-webkit-scrollbar { height: 0; }
+.cat-nav-track.dragging { cursor: grabbing; }
 
-.cat-pill {
-  display: inline-flex;
+.cat-nav-btn {
+  display: flex;
   align-items: center;
   gap: 6px;
   white-space: nowrap;
   padding: 8px 16px;
   border-radius: 50px;
-  border: 2px solid #ddd;
-  background: #fff;
+  border: 1.5px solid #e0e0e0;
+  background: #f7f7f7;
   color: #333;
-  font-weight: 600;
   font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.18s ease;
   flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+  transition: all 0.18s ease;
   position: relative;
 }
-.cat-pill:hover {
+.cat-nav-btn:hover {
   border-color: #111;
-  background: #f5f5f5;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  background: #f0f0f0;
+  color: #111;
 }
-.cat-pill.active {
+.cat-nav-btn.active {
   background: #111;
-  color: #fff;
   border-color: #111;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.22);
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.18);
 }
-.cat-pill .pill-copy {
-  display: none;
+.cat-nav-btn .cat-count {
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(0,0,0,0.12);
+  border-radius: 50px;
+  padding: 1px 6px;
+  min-width: 18px;
+  text-align: center;
+}
+.cat-nav-btn.active .cat-count {
+  background: rgba(255,255,255,0.22);
+}
+
+.cat-nav-arrow {
+  flex-shrink: 0;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.22);
-  font-size: 11px;
-  transition: background 0.15s;
-}
-.cat-pill.active .pill-copy {
-  display: inline-flex;
-}
-.cat-pill .pill-copy:hover {
-  background: rgba(255,255,255,0.4);
-}
-
-/* ===== PAINEL MODELO DO CAMINHÃO ===== */
-.modelo-panel {
-  margin: 16px 0 8px;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.10);
-  border: 1.5px solid #e0e0e0;
-  background: #fff;
-}
-
-.modelo-panel-trigger {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 18px;
-  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 60%, #111 100%);
-  border: none;
   cursor: pointer;
-  gap: 12px;
-  transition: background 0.2s;
+  font-size: 14px;
+  color: #333;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: all 0.15s;
+  z-index: 2;
 }
-.modelo-panel-trigger:hover {
-  background: linear-gradient(135deg, #222 0%, #383838 60%, #1a1a1a 100%);
-}
-
-.modelo-trigger-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.modelo-trigger-icon {
-  font-size: 26px;
-  line-height: 1;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-}
-
-.modelo-trigger-text {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-}
-
-.modelo-trigger-title {
-  font-size: 15px;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: 0.3px;
-  text-align: left;
-}
-
-.modelo-trigger-sub {
-  font-size: 12px;
-  color: rgba(255,255,255,0.6);
-  font-weight: 400;
-  text-align: left;
-}
-
-.modelo-trigger-arrow {
-  font-size: 13px;
-  color: rgba(255,255,255,0.7);
-  transition: transform 0.3s ease;
-  flex-shrink: 0;
-}
-.modelo-panel.open .modelo-trigger-arrow {
-  transform: rotate(180deg);
-}
-
-.modelo-panel-body {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.35s ease, padding 0.3s ease;
-  background: #fafafa;
-  padding: 0 12px;
-}
-.modelo-panel.open .modelo-panel-body {
-  max-height: 200px;
-  padding: 12px;
-}
-
-/* Ajuste da pills bar dentro do painel */
-.modelo-panel-body .cat-pills-bar {
-  margin-bottom: 0;
-  padding: 4px 2px 6px;
-}
-
-/* toast de copiado */
-.toast-link {
-  position: fixed;
-  bottom: 90px;
-  left: 50%;
-  transform: translateX(-50%) translateY(20px);
+.cat-nav-arrow:hover {
   background: #111;
   color: #fff;
-  padding: 10px 20px;
+  border-color: #111;
+}
+
+/* Botão de compartilhar categoria */
+.cat-share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 10px;
+  font-size: 11.5px;
+  color: #555;
+  background: #f4f4f4;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 5px 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.15s;
+  text-decoration: none;
+}
+.cat-share-btn:hover {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+
+#catShareRow {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #f0f0f0;
+}
+#catShareRow.visible {
+  display: flex;
+}
+
+#catShareLabel {
+  font-size: 12px;
+  color: #555;
+  font-weight: 500;
+}
+
+#catShareLink {
+  flex: 1;
+  min-width: 0;
+  font-size: 11.5px;
+  color: #111;
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 5px 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 260px;
+  cursor: default;
+}
+
+#btnCopyLink {
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+#btnCopyLink:hover { background: #333; }
+
+#catShareToast {
+  display: none;
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #111;
+  color: #fff;
+  padding: 10px 22px;
   border-radius: 50px;
   font-size: 13px;
   font-weight: 600;
   z-index: 99999;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.25s, transform 0.25s;
-  white-space: nowrap;
+  animation: toastIn 0.2s ease;
 }
-.toast-link.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
-/* ===== CORREÇÃO DAS SETINHAS ===== */
-.banner-carousel,
-.categoria-wrap {
-  overflow: visible !important;
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
 #prevBanner,
@@ -1407,6 +1432,22 @@ footer {
   <button class="arrow-btn arrow-right" id="nextBanner">❯</button>
 </section>
 
+<!-- BARRA DE NAVEGAÇÃO POR CATEGORIA -->
+<div class="cat-nav-wrapper" id="catNavWrapper" style="display:none;">
+  <div class="cat-nav-label">📂 Navegar por categoria</div>
+  <div class="cat-nav-scroll-wrapper">
+    <button class="cat-nav-arrow" id="catNavPrev">❮</button>
+    <div class="cat-nav-track" id="catNavTrack"></div>
+    <button class="cat-nav-arrow" id="catNavNext">❯</button>
+  </div>
+  <div id="catShareRow">
+    <span id="catShareLabel">🔗 Link da categoria:</span>
+    <span id="catShareLink"></span>
+    <button id="btnCopyLink">Copiar</button>
+  </div>
+</div>
+<div id="catShareToast">✅ Link copiado!</div>
+
 <div class="filters">
   <select id="filterCategoria"><option value="">Todas categorias</option></select>
   <select id="sort"><option value="recent">Mais recentes</option>
@@ -1415,30 +1456,10 @@ footer {
   <button id="clearFilters">Limpar filtros</button>
 </div>
 
-<!-- PAINEL ESCOLHA DO MODELO -->
-<div class="modelo-panel" id="modeloPanel">
-  <button class="modelo-panel-trigger" id="modeloTrigger" onclick="toggleModeloPanel()">
-    <div class="modelo-trigger-left">
-      <span class="modelo-trigger-icon">&#128666;</span>
-      <div class="modelo-trigger-text">
-        <span class="modelo-trigger-title">Escolha o Modelo do seu Caminhão</span>
-        <span class="modelo-trigger-sub" id="modeloSubLabel">Todas as categorias</span>
-      </div>
-    </div>
-    <span class="modelo-trigger-arrow" id="modeloArrow">&#9660;</span>
-  </button>
-  <div class="modelo-panel-body" id="modeloPanelBody">
-    <div id="catPillsBar" class="cat-pills-bar"></div>
-  </div>
-</div>
-
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
   <h2 style="margin:0">Produtos</h2>
   <div style="color:var(--muted)">Mostrando <span id="prodCount">0</span> produtos</div>
 </div>
-
-<!-- Toast de link copiado -->
-<div class="toast-link" id="toastLink">🔗 Link copiado!</div>
 
 <div id="productsGrid" class="products-grid"></div>
 
@@ -1950,18 +1971,6 @@ function debounce(fn, delay = 300) {
 }
 
 
-/* ===== TOGGLE DO PAINEL MODELO ===== */
-window.toggleModeloPanel = function() {
-  const panel = document.getElementById("modeloPanel");
-  panel.classList.toggle("open");
-};
-
-/* Atualiza o sub-label do painel */
-function atualizarSubLabel(cat) {
-  const sub = document.getElementById("modeloSubLabel");
-  if (sub) sub.textContent = cat ? cat : "Todas as categorias";
-}
-
 document.addEventListener('DOMContentLoaded', () => {
   const grid = document.getElementById('productsGrid');
   const prodCount = document.getElementById('prodCount');
@@ -2143,138 +2152,136 @@ function mostrarSkeletons() {
     opt.textContent = cat;
     select.appendChild(opt);
   });
-
-  renderCatPills(categoriasUnicas);
-  aplicarFiltroURL();
 }
 
-/* ─── BOTÕES RÁPIDOS DE CATEGORIA ─── */
-function renderCatPills(categorias) {
-  const bar = document.getElementById("catPillsBar");
-  bar.innerHTML = "";
+  // ===== BARRA DE CATEGORIAS DESLIZANTE =====
+  let catNavAtiva = '';
 
-  // Botão "Todos"
-  const pillTodos = document.createElement("button");
-  pillTodos.className = "cat-pill" + (!filterCategoria.value ? " active" : "");
-  pillTodos.textContent = "🏷️ Todos";
-  pillTodos.onclick = () => selecionarCategoriaPill("", pillTodos);
-  bar.appendChild(pillTodos);
+  function construirBarraCategorias() {
+    const track = document.getElementById('catNavTrack');
+    const wrapper = document.getElementById('catNavWrapper');
+    if (!track) return;
 
-  categorias.forEach(cat => {
-    const pill = document.createElement("button");
-    const isAtivo = filterCategoria.value === cat;
-    pill.className = "cat-pill" + (isAtivo ? " active" : "");
-    pill.dataset.cat = cat;
-    pill.innerHTML = `<span class="pill-label"></span><span class="pill-copy" title="Copiar link desta categoria">🔗</span>`;
-    pill.querySelector('.pill-label').textContent = cat;
+    const categoriasUnicas = ['Todos', ...[...new Set(
+      produtos.map(p => p.categoria_nome || p.categoria).filter(Boolean)
+    )]];
 
-    // Botão copiar — usa addEventListener para evitar problemas de escape
-    const copyBtn = pill.querySelector('.pill-copy');
-    copyBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
+    // Contagem por categoria
+    const contagem = {};
+    produtos.forEach(p => {
+      const c = p.categoria_nome || p.categoria || 'Outros';
+      contagem[c] = (contagem[c] || 0) + 1;
+    });
+
+    track.innerHTML = categoriasUnicas.map(cat => {
+      const isAll = cat === 'Todos';
+      const count = isAll ? produtos.length : (contagem[cat] || 0);
+      const isActive = isAll ? catNavAtiva === '' : catNavAtiva === cat;
+      return `<button class="cat-nav-btn${isActive ? ' active' : ''}" 
+                data-cat="${isAll ? '' : cat}"
+                onclick="selecionarCatNav('${isAll ? '' : cat.replace(/'/g, "\\'")}')">
+        ${cat}
+        <span class="cat-count">${count}</span>
+      </button>`;
+    }).join('');
+
+    wrapper.style.display = 'block';
+
+    // Drag/swipe na barra
+    let isDown = false, startX = 0, scrollLeft = 0;
+    track.addEventListener('mousedown', e => {
+      isDown = true; startX = e.pageX; scrollLeft = track.scrollLeft;
+      track.classList.add('dragging');
+    });
+    track.addEventListener('mouseleave', () => { isDown = false; track.classList.remove('dragging'); });
+    track.addEventListener('mouseup', () => { isDown = false; track.classList.remove('dragging'); });
+    track.addEventListener('mousemove', e => {
+      if (!isDown) return;
       e.preventDefault();
-      const url = new URL(window.location.href);
-      url.searchParams.set("categoria", cat);
-      const linkParaCopiar = url.toString();
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(linkParaCopiar).then(() => {
-          mostrarToast("🔗 Link copiado!");
-        }).catch(() => copiarFallback(linkParaCopiar));
-      } else {
-        copiarFallback(linkParaCopiar);
-      }
+      track.scrollLeft = scrollLeft + (startX - e.pageX) * 1.3;
     });
+    track.addEventListener('touchstart', e => { startX = e.touches[0].pageX; scrollLeft = track.scrollLeft; }, { passive: true });
+    track.addEventListener('touchmove', e => {
+      track.scrollLeft = scrollLeft + (startX - e.touches[0].pageX) * 1.5;
+    }, { passive: true });
 
-    // Clique no pill (filtrar)
-    pill.addEventListener('click', (e) => {
-      if (e.target.closest('.pill-copy')) return;
-      selecionarCategoriaPill(cat, pill);
-    });
+    // Setas
+    document.getElementById('catNavPrev').onclick = () => track.scrollBy({ left: -220, behavior: 'smooth' });
+    document.getElementById('catNavNext').onclick = () => track.scrollBy({ left: 220, behavior: 'smooth' });
 
-    bar.appendChild(pill);
-  });
-}
-
-function selecionarCategoriaPill(cat, pillEl) {
-  // Atualiza o select
-  filterCategoria.value = cat;
-  renderProdutos();
-
-  // Atualiza URL sem recarregar
-  const url = new URL(window.location.href);
-  if (cat) {
-    url.searchParams.set("categoria", cat);
-  } else {
-    url.searchParams.delete("categoria");
+    // Rolar até o botão ativo
+    const activeBtn = track.querySelector('.cat-nav-btn.active');
+    if (activeBtn) setTimeout(() => activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }), 80);
   }
-  history.replaceState(null, "", url.toString());
 
-  // Atualiza visual dos pills
-  document.querySelectorAll("#catPillsBar .cat-pill").forEach(p => p.classList.remove("active"));
-  pillEl.classList.add("active");
+  window.selecionarCatNav = function(cat) {
+    catNavAtiva = cat;
 
-  // Atualiza sub-label e fecha o painel
-  atualizarSubLabel(cat);
-  const panel = document.getElementById("modeloPanel");
-  if (panel) panel.classList.remove("open");
-
-  // Scroll o pill para o centro
-  pillEl.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
-}
-
-function copiarFallback(texto) {
-  const el = document.createElement("textarea");
-  el.value = texto;
-  el.style.position = "fixed";
-  el.style.opacity = "0";
-  document.body.appendChild(el);
-  el.focus();
-  el.select();
-  try {
-    document.execCommand("copy");
-    mostrarToast("🔗 Link copiado!");
-  } catch(e) {
-    mostrarToast("❌ Não foi possível copiar");
-  }
-  document.body.removeChild(el);
-}
-
-function copiarLinkCategoria(e, cat) {
-  e.stopPropagation();
-  const url = new URL(window.location.href);
-  url.searchParams.set("categoria", cat);
-  navigator.clipboard.writeText(url.toString()).then(() => {
-    mostrarToast("🔗 Link copiado!");
-  }).catch(() => {
-    copiarFallback(url.toString());
-  });
-}
-
-function mostrarToast(msg) {
-  const t = document.getElementById("toastLink");
-  t.textContent = msg;
-  t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), 2200);
-}
-
-/* Lê ?categoria= da URL e aplica o filtro ao carregar */
-function aplicarFiltroURL() {
-  const params = new URLSearchParams(window.location.search);
-  const cat = params.get("categoria");
-  if (cat) {
+    // Atualiza o select escondido para manter compatibilidade
     filterCategoria.value = cat;
     renderProdutos();
-    // Ativa o pill correspondente
+    construirBarraCategorias();
+
+    // Atualiza URL sem recarregar
+    const url = new URL(window.location.href);
+    if (cat) {
+      url.searchParams.set('categoria', cat);
+    } else {
+      url.searchParams.delete('categoria');
+    }
+    history.pushState({}, '', url.toString());
+
+    // Mostra/esconde linha de compartilhamento
+    const shareRow = document.getElementById('catShareRow');
+    if (cat) {
+      shareRow.classList.add('visible');
+      document.getElementById('catShareLink').textContent = url.toString();
+    } else {
+      shareRow.classList.remove('visible');
+    }
+
+    // Scroll suave para os produtos
     setTimeout(() => {
-      const pill = document.querySelector(`#catPillsBar .cat-pill[data-cat="${CSS.escape(cat)}"]`);
-      if (pill) {
-        document.querySelectorAll("#catPillsBar .cat-pill").forEach(p => p.classList.remove("active"));
-        pill.classList.add("active");
-        pill.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
-      }
-    }, 50);
+      const grid = document.getElementById('productsGrid');
+      if (grid) grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 80);
+  };
+
+  // Botão copiar link
+  document.getElementById('btnCopyLink').addEventListener('click', () => {
+    const link = document.getElementById('catShareLink').textContent;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(link).then(mostrarToast);
+    } else {
+      const el = document.createElement('textarea');
+      el.value = link; document.body.appendChild(el); el.select();
+      document.execCommand('copy'); document.body.removeChild(el);
+      mostrarToast();
+    }
+  });
+
+  function mostrarToast() {
+    const t = document.getElementById('catShareToast');
+    t.style.display = 'block';
+    setTimeout(() => { t.style.display = 'none'; }, 2000);
   }
-}
+
+  // Ler categoria da URL ao carregar
+  function lerCategoriaURL() {
+    const params = new URLSearchParams(window.location.search);
+    const cat = params.get('categoria');
+    if (cat) {
+      catNavAtiva = cat;
+      filterCategoria.value = cat;
+      const shareRow = document.getElementById('catShareRow');
+      if (shareRow) {
+        shareRow.classList.add('visible');
+        const link = document.getElementById('catShareLink');
+        if (link) link.textContent = window.location.href;
+      }
+    }
+  }
+  // ===== FIM BARRA DE CATEGORIAS =====
 
   async function fetchProdutos(){
   try {
@@ -2299,6 +2306,8 @@ function aplicarFiltroURL() {
     // Render imediato — skeleton some, cards aparecem com texto/preço/botões
     renderMenuCategorias();
     preencherFiltroCategorias();
+    lerCategoriaURL();
+    construirBarraCategorias();
     if (!q.value.trim()) renderProdutos();
 
   } catch (e) {
@@ -3295,28 +3304,9 @@ if (!temPlaca && !temLum && !temFaixaPersonalizada) {
   window.decrease = (id)=>{ decrease(id); };
 
   q.addEventListener('input', debounce(renderProdutos, 300));
-  filterCategoria.addEventListener('change', () => {
-    renderProdutos();
-    const val = filterCategoria.value;
-    document.querySelectorAll("#catPillsBar .cat-pill").forEach(p => {
-      p.classList.toggle("active", (p.dataset.cat || "") === val);
-    });
-    const url = new URL(window.location.href);
-    if (val) url.searchParams.set("categoria", val); else url.searchParams.delete("categoria");
-    history.replaceState(null, "", url.toString());
-  });
+  filterCategoria.addEventListener('change', () => { catNavAtiva = filterCategoria.value; construirBarraCategorias(); renderProdutos(); });
   sortSel.addEventListener('change', renderProdutos);
-  document.getElementById('clearFilters').addEventListener('click', ()=>{ 
-    q.value=''; filterCategoria.value=''; sortSel.value='recent'; 
-    renderProdutos(); 
-    document.querySelectorAll("#catPillsBar .cat-pill").forEach(p => p.classList.remove("active"));
-    const todos = document.querySelector("#catPillsBar .cat-pill");
-    if(todos) todos.classList.add("active");
-    atualizarSubLabel("");
-    const url = new URL(window.location.href);
-    url.searchParams.delete("categoria");
-    history.replaceState(null, "", url.toString());
-  });
+  document.getElementById('clearFilters').addEventListener('click', ()=>{ q.value=''; filterCategoria.value=''; catNavAtiva=''; sortSel.value='recent'; construirBarraCategorias(); renderProdutos(); history.pushState({}, '', window.location.pathname); document.getElementById('catShareRow').classList.remove('visible'); });
 
 
   let fullIndex = 0;
@@ -3395,20 +3385,7 @@ function renderMenuCategorias() {
 }
 
 window.selecionarCategoriaMenu = (cat) => {
-    document.getElementById("filterCategoria").value = cat;
-    renderProdutos();
-
-    // Sincroniza pills
-    document.querySelectorAll("#catPillsBar .cat-pill").forEach(p => {
-      p.classList.toggle("active", (p.dataset.cat || "") === cat);
-    });
-    const pill = document.querySelector(`#catPillsBar .cat-pill[data-cat="${CSS.escape(cat)}"]`);
-    if (pill) pill.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
-
-    // Atualiza URL
-    const url = new URL(window.location.href);
-    url.searchParams.set("categoria", cat);
-    history.replaceState(null, "", url.toString());
+    selecionarCatNav(cat);
 
     menu.style.transform = "translateX(-100%)";
     mask.style.display = "none";
