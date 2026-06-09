@@ -11,26 +11,26 @@ export default async function handler(req, res) {
   }
 
   if (req.method === "POST") {
-    const { nome } = req.body;
+    const { nome, imagem } = req.body;
     if (!nome) return res.status(400).json({ error: "Nome é obrigatório" });
 
     const result = await pool.query(
-      "INSERT INTO categorias (nome) VALUES ($1) RETURNING *",
-      [nome]
+      "INSERT INTO categorias (nome, imagem) VALUES ($1, $2) RETURNING *",
+      [nome, imagem || null]
     );
     res.status(201).json(result.rows[0]);
   }
 
   if (req.method === "PUT") {
-    const { id, nome } = req.body;
+    const { id, nome, imagem } = req.body;
 
     if (!id || !nome) {
       return res.status(400).json({ error: "ID e novo nome são obrigatórios" });
     }
 
     const result = await pool.query(
-      "UPDATE categorias SET nome = $1 WHERE id = $2 RETURNING *",
-      [nome, id]
+      "UPDATE categorias SET nome = $1, imagem = $2 WHERE id = $3 RETURNING *",
+      [nome, imagem || null, id]
     );
 
     if (result.rowCount === 0) {
