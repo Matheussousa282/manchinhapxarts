@@ -1240,6 +1240,94 @@ footer {
   background: rgba(255,255,255,0.4);
 }
 
+/* ===== PAINEL MODELO DO CAMINHÃO ===== */
+.modelo-panel {
+  margin: 16px 0 8px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+  border: 1.5px solid #e0e0e0;
+  background: #fff;
+}
+
+.modelo-panel-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 60%, #111 100%);
+  border: none;
+  cursor: pointer;
+  gap: 12px;
+  transition: background 0.2s;
+}
+.modelo-panel-trigger:hover {
+  background: linear-gradient(135deg, #222 0%, #383838 60%, #1a1a1a 100%);
+}
+
+.modelo-trigger-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.modelo-trigger-icon {
+  font-size: 26px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+.modelo-trigger-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.modelo-trigger-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.3px;
+  text-align: left;
+}
+
+.modelo-trigger-sub {
+  font-size: 12px;
+  color: rgba(255,255,255,0.6);
+  font-weight: 400;
+  text-align: left;
+}
+
+.modelo-trigger-arrow {
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+}
+.modelo-panel.open .modelo-trigger-arrow {
+  transform: rotate(180deg);
+}
+
+.modelo-panel-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease, padding 0.3s ease;
+  background: #fafafa;
+  padding: 0 12px;
+}
+.modelo-panel.open .modelo-panel-body {
+  max-height: 200px;
+  padding: 12px;
+}
+
+/* Ajuste da pills bar dentro do painel */
+.modelo-panel-body .cat-pills-bar {
+  margin-bottom: 0;
+  padding: 4px 2px 6px;
+}
+
 /* toast de copiado */
 .toast-link {
   position: fixed;
@@ -1327,8 +1415,22 @@ footer {
   <button id="clearFilters">Limpar filtros</button>
 </div>
 
-<!-- BARRA DE CATEGORIAS RÁPIDAS -->
-<div id="catPillsBar" class="cat-pills-bar"></div>
+<!-- PAINEL ESCOLHA DO MODELO -->
+<div class="modelo-panel" id="modeloPanel">
+  <button class="modelo-panel-trigger" id="modeloTrigger" onclick="toggleModeloPanel()">
+    <div class="modelo-trigger-left">
+      <span class="modelo-trigger-icon">&#128666;</span>
+      <div class="modelo-trigger-text">
+        <span class="modelo-trigger-title">Escolha o Modelo do seu Caminhão</span>
+        <span class="modelo-trigger-sub" id="modeloSubLabel">Todas as categorias</span>
+      </div>
+    </div>
+    <span class="modelo-trigger-arrow" id="modeloArrow">&#9660;</span>
+  </button>
+  <div class="modelo-panel-body" id="modeloPanelBody">
+    <div id="catPillsBar" class="cat-pills-bar"></div>
+  </div>
+</div>
 
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
   <h2 style="margin:0">Produtos</h2>
@@ -1848,6 +1950,18 @@ function debounce(fn, delay = 300) {
 }
 
 
+/* ===== TOGGLE DO PAINEL MODELO ===== */
+window.toggleModeloPanel = function() {
+  const panel = document.getElementById("modeloPanel");
+  panel.classList.toggle("open");
+};
+
+/* Atualiza o sub-label do painel */
+function atualizarSubLabel(cat) {
+  const sub = document.getElementById("modeloSubLabel");
+  if (sub) sub.textContent = cat ? cat : "Todas as categorias";
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const grid = document.getElementById('productsGrid');
   const prodCount = document.getElementById('prodCount');
@@ -2098,6 +2212,11 @@ function selecionarCategoriaPill(cat, pillEl) {
   // Atualiza visual dos pills
   document.querySelectorAll("#catPillsBar .cat-pill").forEach(p => p.classList.remove("active"));
   pillEl.classList.add("active");
+
+  // Atualiza sub-label e fecha o painel
+  atualizarSubLabel(cat);
+  const panel = document.getElementById("modeloPanel");
+  if (panel) panel.classList.remove("open");
 
   // Scroll o pill para o centro
   pillEl.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
@@ -3193,6 +3312,7 @@ if (!temPlaca && !temLum && !temFaixaPersonalizada) {
     document.querySelectorAll("#catPillsBar .cat-pill").forEach(p => p.classList.remove("active"));
     const todos = document.querySelector("#catPillsBar .cat-pill");
     if(todos) todos.classList.add("active");
+    atualizarSubLabel("");
     const url = new URL(window.location.href);
     url.searchParams.delete("categoria");
     history.replaceState(null, "", url.toString());
