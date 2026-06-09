@@ -1179,6 +1179,90 @@ footer {
 
 }
 
+/* ===== BARRA DE BOTÕES DE CATEGORIA ===== */
+.cat-pills-bar {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 8px 2px 10px;
+  flex-wrap: nowrap;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  margin-bottom: 4px;
+}
+.cat-pills-bar::-webkit-scrollbar { display: none; }
+
+.cat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  padding: 8px 16px;
+  border-radius: 50px;
+  border: 2px solid #ddd;
+  background: #fff;
+  color: #333;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+  position: relative;
+}
+.cat-pill:hover {
+  border-color: #111;
+  background: #f5f5f5;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+.cat-pill.active {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.22);
+}
+.cat-pill .pill-copy {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.22);
+  font-size: 11px;
+  transition: background 0.15s;
+}
+.cat-pill.active .pill-copy {
+  display: inline-flex;
+}
+.cat-pill .pill-copy:hover {
+  background: rgba(255,255,255,0.4);
+}
+
+/* toast de copiado */
+.toast-link {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: #111;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 99999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s, transform 0.25s;
+  white-space: nowrap;
+}
+.toast-link.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
 /* ===== CORREÇÃO DAS SETINHAS ===== */
 .banner-carousel,
 .categoria-wrap {
@@ -1243,10 +1327,16 @@ footer {
   <button id="clearFilters">Limpar filtros</button>
 </div>
 
+<!-- BARRA DE CATEGORIAS RÁPIDAS -->
+<div id="catPillsBar" class="cat-pills-bar"></div>
+
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
   <h2 style="margin:0">Produtos</h2>
   <div style="color:var(--muted)">Mostrando <span id="prodCount">0</span> produtos</div>
 </div>
+
+<!-- Toast de link copiado -->
+<div class="toast-link" id="toastLink">🔗 Link copiado!</div>
 
 <div id="productsGrid" class="products-grid"></div>
 
@@ -1939,6 +2029,101 @@ function mostrarSkeletons() {
     opt.textContent = cat;
     select.appendChild(opt);
   });
+
+  renderCatPills(categoriasUnicas);
+  aplicarFiltroURL();
+}
+
+/* ─── BOTÕES RÁPIDOS DE CATEGORIA ─── */
+function renderCatPills(categorias) {
+  const bar = document.getElementById("catPillsBar");
+  bar.innerHTML = "";
+
+  // Botão "Todos"
+  const pillTodos = document.createElement("button");
+  pillTodos.className = "cat-pill" + (!filterCategoria.value ? " active" : "");
+  pillTodos.textContent = "🏷️ Todos";
+  pillTodos.onclick = () => selecionarCategoriaPill("", pillTodos);
+  bar.appendChild(pillTodos);
+
+  categorias.forEach(cat => {
+    const pill = document.createElement("button");
+    const isAtivo = filterCategoria.value === cat;
+    pill.className = "cat-pill" + (isAtivo ? " active" : "");
+    pill.dataset.cat = cat;
+    pill.innerHTML = `<span class="pill-label">${cat}</span><span class="pill-copy" title="Copiar link desta categoria" onclick="copiarLinkCategoria(event,'${escapeHtml(cat)}')">🔗</span>`;
+    pill.onclick = (e) => {
+      if (e.target.closest('.pill-copy')) return;
+      selecionarCategoriaPill(cat, pill);
+    };
+    bar.appendChild(pill);
+  });
+}
+
+function selecionarCategoriaPill(cat, pillEl) {
+  // Atualiza o select
+  filterCategoria.value = cat;
+  renderProdutos();
+
+  // Atualiza URL sem recarregar
+  const url = new URL(window.location.href);
+  if (cat) {
+    url.searchParams.set("categoria", cat);
+  } else {
+    url.searchParams.delete("categoria");
+  }
+  history.replaceState(null, "", url.toString());
+
+  // Atualiza visual dos pills
+  document.querySelectorAll("#catPillsBar .cat-pill").forEach(p => p.classList.remove("active"));
+  pillEl.classList.add("active");
+
+  // Scroll o pill para o centro
+  pillEl.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+}
+
+function copiarLinkCategoria(e, cat) {
+  e.stopPropagation();
+  const url = new URL(window.location.href);
+  url.searchParams.set("categoria", cat);
+  navigator.clipboard.writeText(url.toString()).then(() => {
+    mostrarToast("🔗 Link copiado!");
+  }).catch(() => {
+    // fallback para navegadores sem clipboard
+    const el = document.createElement("textarea");
+    el.value = url.toString();
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand("copy");
+    document.body.removeChild(el);
+    mostrarToast("🔗 Link copiado!");
+  });
+}
+
+function mostrarToast(msg) {
+  const t = document.getElementById("toastLink");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2200);
+}
+
+/* Lê ?categoria= da URL e aplica o filtro ao carregar */
+function aplicarFiltroURL() {
+  const params = new URLSearchParams(window.location.search);
+  const cat = params.get("categoria");
+  if (cat) {
+    filterCategoria.value = cat;
+    renderProdutos();
+    // Ativa o pill correspondente
+    setTimeout(() => {
+      const pill = document.querySelector(`#catPillsBar .cat-pill[data-cat="${CSS.escape(cat)}"]`);
+      if (pill) {
+        document.querySelectorAll("#catPillsBar .cat-pill").forEach(p => p.classList.remove("active"));
+        pill.classList.add("active");
+        pill.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+      }
+    }, 50);
+  }
 }
 
   async function fetchProdutos(){
@@ -2960,9 +3145,27 @@ if (!temPlaca && !temLum && !temFaixaPersonalizada) {
   window.decrease = (id)=>{ decrease(id); };
 
   q.addEventListener('input', debounce(renderProdutos, 300));
-  filterCategoria.addEventListener('change', renderProdutos);
+  filterCategoria.addEventListener('change', () => {
+    renderProdutos();
+    const val = filterCategoria.value;
+    document.querySelectorAll("#catPillsBar .cat-pill").forEach(p => {
+      p.classList.toggle("active", (p.dataset.cat || "") === val);
+    });
+    const url = new URL(window.location.href);
+    if (val) url.searchParams.set("categoria", val); else url.searchParams.delete("categoria");
+    history.replaceState(null, "", url.toString());
+  });
   sortSel.addEventListener('change', renderProdutos);
-  document.getElementById('clearFilters').addEventListener('click', ()=>{ q.value=''; filterCategoria.value=''; sortSel.value='recent'; renderProdutos(); });
+  document.getElementById('clearFilters').addEventListener('click', ()=>{ 
+    q.value=''; filterCategoria.value=''; sortSel.value='recent'; 
+    renderProdutos(); 
+    document.querySelectorAll("#catPillsBar .cat-pill").forEach(p => p.classList.remove("active"));
+    const todos = document.querySelector("#catPillsBar .cat-pill");
+    if(todos) todos.classList.add("active");
+    const url = new URL(window.location.href);
+    url.searchParams.delete("categoria");
+    history.replaceState(null, "", url.toString());
+  });
 
 
   let fullIndex = 0;
@@ -3043,6 +3246,18 @@ function renderMenuCategorias() {
 window.selecionarCategoriaMenu = (cat) => {
     document.getElementById("filterCategoria").value = cat;
     renderProdutos();
+
+    // Sincroniza pills
+    document.querySelectorAll("#catPillsBar .cat-pill").forEach(p => {
+      p.classList.toggle("active", (p.dataset.cat || "") === cat);
+    });
+    const pill = document.querySelector(`#catPillsBar .cat-pill[data-cat="${CSS.escape(cat)}"]`);
+    if (pill) pill.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+
+    // Atualiza URL
+    const url = new URL(window.location.href);
+    url.searchParams.set("categoria", cat);
+    history.replaceState(null, "", url.toString());
 
     menu.style.transform = "translateX(-100%)";
     mask.style.display = "none";
