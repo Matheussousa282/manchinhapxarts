@@ -1267,6 +1267,19 @@ footer {
   background: rgba(255,255,255,0.22);
 }
 
+/* Emblema dentro do botão de categoria */
+.cat-nav-btn .cat-emblema {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  border-radius: 3px;
+  flex-shrink: 0;
+  display: block;
+}
+.cat-nav-btn.active .cat-emblema {
+  filter: brightness(0) invert(1);
+}
+
 .cat-nav-arrow {
   flex-shrink: 0;
   background: #fff;
@@ -2156,6 +2169,19 @@ function mostrarSkeletons() {
 
   // ===== BARRA DE CATEGORIAS DESLIZANTE =====
   let catNavAtiva = '';
+  let _categoriasImagens = {}; // cache: nome => imagem (base64 ou null)
+
+  async function carregarImagensCategorias() {
+    try {
+      const res = await fetch('/api/categorias');
+      const lista = await res.json();
+      lista.forEach(c => {
+        _categoriasImagens[c.nome] = c.imagem || null;
+      });
+    } catch(e) {
+      // Se falhar, segue sem imagens
+    }
+  }
 
   function construirBarraCategorias() {
     const track = document.getElementById('catNavTrack');
@@ -2177,10 +2203,16 @@ function mostrarSkeletons() {
       const isAll = cat === 'Todos';
       const count = isAll ? produtos.length : (contagem[cat] || 0);
       const isActive = isAll ? catNavAtiva === '' : catNavAtiva === cat;
+      const imagem = !isAll ? (_categoriasImagens[cat] || null) : null;
+
+      const icone = imagem
+        ? `<img class="cat-emblema" src="${imagem}" alt="${cat}">`
+        : '';
+
       return `<button class="cat-nav-btn${isActive ? ' active' : ''}" 
                 data-cat="${isAll ? '' : cat}"
                 onclick="selecionarCatNav('${isAll ? '' : cat.replace(/'/g, "\\'")}')">
-        ${cat}
+        ${icone}${cat}
         <span class="cat-count">${count}</span>
       </button>`;
     }).join('');
@@ -2307,6 +2339,8 @@ function mostrarSkeletons() {
     renderMenuCategorias();
     preencherFiltroCategorias();
     lerCategoriaURL();
+    // Carrega imagens das categorias e depois monta a barra
+    await carregarImagensCategorias();
     construirBarraCategorias();
     if (!q.value.trim()) renderProdutos();
 
