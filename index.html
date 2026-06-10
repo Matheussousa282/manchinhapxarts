@@ -2342,8 +2342,6 @@ function mostrarSkeletons() {
     construirBarraCategorias();
     if (!q.value.trim()) renderProdutos();
 
-    // Carrega imagens das categorias em segundo plano e reconstrói a barra
-    carregarImagensCategorias().then(() => construirBarraCategorias()).catch(() => {});
 
   } catch (e) {
     console.error('Erro produtos', e);
@@ -3433,6 +3431,11 @@ window.selecionarCategoriaMenu = (cat) => {
   fetchProdutos();
   carregarBanners();
   updateCartUI();
+
+  // Carrega imagens das categorias separadamente, depois que tudo já carregou
+  setTimeout(() => {
+    carregarImagensCategorias().then(() => construirBarraCategorias()).catch(() => {});
+  }, 1500);
 });
 </script>
 </body>
