@@ -1267,19 +1267,6 @@ footer {
   background: rgba(255,255,255,0.22);
 }
 
-/* Emblema dentro do botão de categoria */
-.cat-nav-btn .cat-emblema {
-  width: 32px;
-  height: 32px;
-  object-fit: contain;
-  border-radius: 3px;
-  flex-shrink: 0;
-  display: block;
-}
-.cat-nav-btn.active .cat-emblema {
-  filter: brightness(0) invert(1);
-}
-
 .cat-nav-arrow {
   flex-shrink: 0;
   background: #fff;
@@ -2169,19 +2156,6 @@ function mostrarSkeletons() {
 
   // ===== BARRA DE CATEGORIAS DESLIZANTE =====
   let catNavAtiva = '';
-  let _categoriasImagens = {}; // cache: nome => imagem (base64 ou null)
-
-  async function carregarImagensCategorias() {
-    try {
-      const res = await fetch('/api/categorias');
-      const lista = await res.json();
-      lista.forEach(c => {
-        _categoriasImagens[c.nome] = c.imagem || null;
-      });
-    } catch(e) {
-      // Se falhar, segue sem imagens
-    }
-  }
 
   function construirBarraCategorias() {
     const track = document.getElementById('catNavTrack');
@@ -2199,14 +2173,21 @@ function mostrarSkeletons() {
       contagem[c] = (contagem[c] || 0) + 1;
     });
 
+    const mapaImagem = window._catImagemMap || {};
+
     track.innerHTML = categoriasUnicas.map(cat => {
       const isAll = cat === 'Todos';
       const count = isAll ? produtos.length : (contagem[cat] || 0);
       const isActive = isAll ? catNavAtiva === '' : catNavAtiva === cat;
-      const imagem = !isAll ? (_categoriasImagens[cat] || null) : null;
+      const imagem = !isAll ? mapaImagem[cat] : null;
 
-      const conteudo = (!isAll && imagem)
-        ? `<img class="cat-emblema" src="${imagem}" alt="${cat}" title="${cat}">`
+      // Se tiver imagem: mostra emblema + nome; senão só o nome
+      const conteudo = imagem
+        ? `<img src="${imagem}" alt="${cat}"
+              style="width:24px;height:24px;object-fit:contain;flex-shrink:0;
+                     filter:${isActive ? 'brightness(0) invert(1)' : 'none'};
+                     transition:filter 0.18s;">
+           ${cat}`
         : cat;
 
       return `<button class="cat-nav-btn${isActive ? ' active' : ''}" 
@@ -2317,17 +2298,18 @@ function mostrarSkeletons() {
 
   async function fetchProdutos(){
   try {
-    // Dispara os dois requests ao mesmo tempo
-    const [rProd, rPromo] = await Promise.all([
+    // Dispara os três requests ao mesmo tempo
+    const [rProd, rPromo, rCat] = await Promise.all([
       fetch(API_BASE + '/produtos'),
-      fetch(API_BASE + '/promocoes').catch(() => null)
+      fetch(API_BASE + '/promocoes').catch(() => null),
+      fetch(API_BASE + '/categorias').catch(() => null)
     ]);
 
-    // Lê produto JSON (pode ser grande — não bloqueia a promoção)
-    // Usa text() + JSON.parse assíncrono para não congelar a UI
-    const [texProd, texPromo] = await Promise.all([
+    // Lê JSONs em paralelo
+    const [texProd, texPromo, texCat] = await Promise.all([
       rProd.text(),
-      rPromo ? rPromo.text().catch(() => '[]') : Promise.resolve('[]')
+      rPromo ? rPromo.text().catch(() => '[]') : Promise.resolve('[]'),
+      rCat   ? rCat.text().catch(() => '[]')   : Promise.resolve('[]')
     ]);
 
     // Parse fora da thread principal usando scheduler (ou fallback com setTimeout)
@@ -2335,13 +2317,21 @@ function mostrarSkeletons() {
     produtos  = JSON.parse(texProd);
     promocoes = JSON.parse(texPromo || '[]');
 
+    // Monta mapa { nome_da_categoria → imagem_base64 }
+    try {
+      categorias = JSON.parse(texCat || '[]');
+    } catch(e) { categorias = []; }
+    window._catImagemMap = {};
+    categorias.forEach(c => {
+      if (c.nome) window._catImagemMap[c.nome] = c.imagem || null;
+    });
+
     // Render imediato — skeleton some, cards aparecem com texto/preço/botões
     renderMenuCategorias();
     preencherFiltroCategorias();
     lerCategoriaURL();
     construirBarraCategorias();
     if (!q.value.trim()) renderProdutos();
-
 
   } catch (e) {
     console.error('Erro produtos', e);
@@ -3407,14 +3397,25 @@ mask.onclick = () => {
 
 function renderMenuCategorias() {
     const categoriasUnicas = [...new Set(produtos.map(p => p.categoria_nome || p.categoria))];
+    const mapaImagem = window._catImagemMap || {};
 
-    listaMenu.innerHTML = categoriasUnicas.map(cat => `
-        <div class="item-categoria-menu" 
-             onclick="selecionarCategoriaMenu('${cat}')"
-             style="padding: 12px; cursor:pointer; font-size:16px; border-bottom:1px solid #eee;">
-            ${cat}
-        </div>
-    `).join("");
+    listaMenu.innerHTML = categoriasUnicas.map(cat => {
+        const imagem = mapaImagem[cat];
+        const emblema = imagem
+            ? `<img src="${imagem}" alt="${cat}" style="width:28px;height:28px;object-fit:contain;flex-shrink:0;border-radius:3px;">`
+            : `<span style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:#f0f0f0;border-radius:50%;font-size:13px;flex-shrink:0;">📂</span>`;
+        return `
+            <div class="item-categoria-menu"
+                 onclick="selecionarCategoriaMenu('${cat.replace(/'/g, "\\'")}')"
+                 style="padding:12px 14px;cursor:pointer;font-size:15px;border-bottom:1px solid #eee;
+                        display:flex;align-items:center;gap:10px;transition:background .15s;"
+                 onmouseover="this.style.background='#f5f5f5'"
+                 onmouseout="this.style.background='transparent'">
+                ${emblema}
+                <span>${cat}</span>
+            </div>
+        `;
+    }).join("");
 }
 
 window.selecionarCategoriaMenu = (cat) => {
@@ -3431,11 +3432,6 @@ window.selecionarCategoriaMenu = (cat) => {
   fetchProdutos();
   carregarBanners();
   updateCartUI();
-
-  // Carrega imagens das categorias separadamente, depois que tudo já carregou
-  setTimeout(() => {
-    carregarImagensCategorias().then(() => construirBarraCategorias()).catch(() => {});
-  }, 1500);
 });
 </script>
 </body>
