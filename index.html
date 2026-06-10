@@ -1269,8 +1269,8 @@ footer {
 
 /* Emblema dentro do botão de categoria */
 .cat-nav-btn .cat-emblema {
-  width: 22px;
-  height: 22px;
+  width: 32px;
+  height: 32px;
   object-fit: contain;
   border-radius: 3px;
   flex-shrink: 0;
@@ -2205,14 +2205,14 @@ function mostrarSkeletons() {
       const isActive = isAll ? catNavAtiva === '' : catNavAtiva === cat;
       const imagem = !isAll ? (_categoriasImagens[cat] || null) : null;
 
-      const icone = imagem
-        ? `<img class="cat-emblema" src="${imagem}" alt="${cat}">`
-        : '';
+      const conteudo = (!isAll && imagem)
+        ? `<img class="cat-emblema" src="${imagem}" alt="${cat}" title="${cat}">`
+        : cat;
 
       return `<button class="cat-nav-btn${isActive ? ' active' : ''}" 
                 data-cat="${isAll ? '' : cat}"
                 onclick="selecionarCatNav('${isAll ? '' : cat.replace(/'/g, "\\'")}')">
-        ${icone}${cat}
+        ${conteudo}
         <span class="cat-count">${count}</span>
       </button>`;
     }).join('');
