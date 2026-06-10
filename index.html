@@ -1266,16 +1266,6 @@ footer {
 .cat-nav-btn.active .cat-count {
   background: rgba(255,255,255,0.22);
 }
-.cat-nav-btn .cat-emblema {
-  width: 22px;
-  height: 22px;
-  object-fit: contain;
-  flex-shrink: 0;
-  transition: filter 0.18s;
-}
-.cat-nav-btn.active .cat-emblema {
-  filter: brightness(0) invert(1);
-}
 
 .cat-nav-arrow {
   flex-shrink: 0;
@@ -2166,7 +2156,6 @@ function mostrarSkeletons() {
 
   // ===== BARRA DE CATEGORIAS DESLIZANTE =====
   let catNavAtiva = '';
-  let categoriasData = []; // { id, nome, imagem } vindos da API
 
   function construirBarraCategorias() {
     const track = document.getElementById('catNavTrack');
@@ -2188,19 +2177,9 @@ function mostrarSkeletons() {
       const isAll = cat === 'Todos';
       const count = isAll ? produtos.length : (contagem[cat] || 0);
       const isActive = isAll ? catNavAtiva === '' : catNavAtiva === cat;
-
-      // Busca imagem cadastrada para esta categoria
-      const dadosCat = categoriasData.find(c => c.nome === cat);
-      const imagem = dadosCat && dadosCat.imagem ? dadosCat.imagem : null;
-
-      const emblema = imagem
-        ? `<img src="${imagem}" alt="${cat}" class="cat-emblema">`
-        : '';
-
       return `<button class="cat-nav-btn${isActive ? ' active' : ''}" 
                 data-cat="${isAll ? '' : cat}"
                 onclick="selecionarCatNav('${isAll ? '' : cat.replace(/'/g, "\\'")}')">
-        ${emblema}
         ${cat}
         <span class="cat-count">${count}</span>
       </button>`;
@@ -2303,19 +2282,6 @@ function mostrarSkeletons() {
     }
   }
   // ===== FIM BARRA DE CATEGORIAS =====
-
-  // Carrega categorias com imagens da API e reconstrói a barra quando chegar
-  async function carregarCategoriasDaAPI() {
-    try {
-      const res = await fetch(API_BASE + '/categorias');
-      if (!res.ok) return;
-      categoriasData = await res.json(); // [{ id, nome, imagem }, ...]
-      // Se os produtos já foram carregados, reconstrói a barra com as imagens
-      if (produtos.length > 0) construirBarraCategorias();
-    } catch (e) {
-      console.warn('Não foi possível carregar imagens das categorias:', e);
-    }
-  }
 
   async function fetchProdutos(){
   try {
@@ -3428,8 +3394,7 @@ window.selecionarCategoriaMenu = (cat) => {
 
   mostrarSkeletons();
 
-  // Dispara tudo em paralelo — produtos + banners + categorias ao mesmo tempo
-  carregarCategoriasDaAPI();
+  // Dispara tudo em paralelo — produtos + banners + promoções ao mesmo tempo
   fetchProdutos();
   carregarBanners();
   updateCartUI();
