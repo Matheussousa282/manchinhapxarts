@@ -2339,10 +2339,11 @@ function mostrarSkeletons() {
     renderMenuCategorias();
     preencherFiltroCategorias();
     lerCategoriaURL();
-    // Carrega imagens das categorias e depois monta a barra
-    await carregarImagensCategorias();
     construirBarraCategorias();
     if (!q.value.trim()) renderProdutos();
+
+    // Carrega imagens das categorias em segundo plano e reconstrói a barra
+    carregarImagensCategorias().then(() => construirBarraCategorias()).catch(() => {});
 
   } catch (e) {
     console.error('Erro produtos', e);
